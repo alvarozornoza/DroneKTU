@@ -32,7 +32,7 @@ using namespace DJI::onboardSDK;
 
 namespace UserConfig
 {
-  const std::string defaultUserConfigPath = "UserConfig.txt";
+  const std::string defaultUserConfigPath = "/home/ubuntu/DroneKTU/build/bin/UserConfig.txt";
 
   //! If using Manifold, the UART2 port shows up as /dev/ttyTHS1.
   //! The Expansion I/O port shows up as /dev/ttyTHS0. 
