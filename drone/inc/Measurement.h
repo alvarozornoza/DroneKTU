@@ -1,4 +1,4 @@
-// Modem.h: interface for the Modem class.
+// Measurement.h
 //
 //////////////////////////////////////////////////////////////////////
 //
@@ -13,7 +13,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2017 Alvaro Zornoza
+// DroneKTU. Copyright (C) 2017 Alvaro Zornoza
 //
 // This app included some libraries and code from DJI. DJI is the 
 // only owner of next subfolders and their respective files:
@@ -32,36 +32,42 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.If not, see <http://www.gnu.org/licenses/>.
 //
-//
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
-#ifndef INC_MODEM_H_
-#define INC_MODEM_H_
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//System Headers
+#include <iostream>
+#include <string>
+#include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h>
-#include <termios.h>
-#include <iostream>
+#include <stdio.h>
+#include <time.h>
+#include <math.h>
 
-#include "SerialInterface.h"
+//DJI Linux Application Headers
+#include "LinuxSerialDevice.h"
+#include "LinuxThread.h"
+#include "LinuxSetup.h"
+#include "LinuxCleanup.h"
+#include "ReadUserConfig.h"
+#include "LinuxMobile.h"
+#include "LinuxFlight.h"
 
-#define DEFAULT_PI_SERIAL_PORT "/dev/ttyTHS0"
+//#include "LinuxInteractive.h"
+#include "LinuxWaypoint.h"
+#include "LinuxCamera.h"
 
-class Modem
-{
-public:	
-	Modem();
-	virtual ~Modem();
+//DJI OSDK Library Headers
+#include <DJI_Follow.h>
+#include <DJI_Flight.h>
+#include <DJI_Version.h>
+#include <DJI_WayPoint.h>
 
-	SerialInterface SIM;
+//User Headers
+#include "Protoboard.h"
+#include "Modem.h"
 
-	int begin();
-	void finish();
-	int getSignalQuality();	
-};
-
-#endif /* INC_MODEM_H_ */
+void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem);
+void getData(double height[], int signal[], Flight* flight, PositionData p, Modem myModem);
+void average(double height[], int signal[], double *height_average, double *signal_average);
+void standardDeviation(double height[], int signal[], double height_average, double signal_average, double *height_sd, double *signal_sd);

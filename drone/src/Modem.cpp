@@ -51,7 +51,7 @@ Modem::Modem()
 
 Modem::~Modem()
 {
-	SIM.close_serial();
+	//SIM.close_serial();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -65,6 +65,11 @@ int Modem::begin()
 	if(setup)
 		SIM.serial_init();
 	return setup;
+}
+
+void Modem::finish()
+{
+	SIM.close_serial();
 }
 
 int Modem::getSignalQuality()
