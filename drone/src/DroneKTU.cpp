@@ -66,33 +66,7 @@ using namespace std;
 using namespace DJI;
 using namespace DJI::onboardSDK;
 
-typedef float float32_t;
-typedef double float64_t;
-typedef struct PositionData 
-{
-	float64_t latitude;
-	float64_t longitude;
-	//! @warning the 'altitude' field will be renamed in a future release.
-	//! @note the altitude value can be configured to output GPS-only data
-	//!       or a fusion of GPS and Baro in Assistant 2's SDK Tab, 'ALTI' 
-	float32_t altitude;
-
-	//! @warning the 'height' field will be renamed in a future release.
-	//! @note the height value can be configured to output AGL height
-	//!       or height relative to takeoff in Assistant 2's SDK Tab, 'HEIGHT'
-	float32_t height;
-
-	uint8_t health;
-} MyPosition;
-
-void clean_stdin(void)
-{
-	int c;
-	do {
-		c=getchar();
-	} while ((c!='\n')&&(c!=EOF));
-}
-
+void clean_stdin(void);
 
 int main(int argc,char* argv[])
 {
@@ -104,16 +78,35 @@ int main(int argc,char* argv[])
 	WayPoint* waypointObj = new WayPoint(api);
 	Camera* camera = new Camera(api);
 	LinuxThread read(api, 2);
-	//MyPosition;
+	PositionData p;
 
 	//Proto.MyLed.LedOn();
-	int a=0;
+
 	std::cout<<"DroneKTU. Copyright (C) 2017 Alvaro Zornoza"<<std::endl<<std::endl;
 
-//	p=flight->getPosition()
+	//! Setup
+	int setupStatus = setup(serialDevice, api, &read);
+	if (setupStatus == -1)
+	{
+	std::cout << "This program will exit now. \n";
+	return 0;
+	}
+	//! Set broadcast Freq Defaults
+	unsigned short broadcastAck = api->setBroadcastFreqDefaults(1);
+
+	p=flight->getPosition();
 
 	std::cout<<"Press enter to continue ..."<<std::endl;
-	
 	std::cin.get();
 	return 0;
 }
+
+void clean_stdin(void)
+{
+	int c;
+	do {
+		c=getchar();
+	} while ((c!='\n')&&(c!=EOF));
+}
+
+
