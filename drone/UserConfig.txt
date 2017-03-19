@@ -1,4 +1,4 @@
-ID:EnterAppID
-KEY:EnterKey1234
-DeviceName: /dev/ttyUSB0
+ID:1038611
+KEY:d18e6e7a0cdf8c63b1cc62271d4657dcdb891635e500112f9cbd7310aa396697
+DeviceName: /dev/ttyUSB1
 BaudRate: 230400
