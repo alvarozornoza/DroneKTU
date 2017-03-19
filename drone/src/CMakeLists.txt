@@ -1,0 +1,10 @@
+INCLUDE_DIRECTORIES("${PROJECT_INCLUDE_DIR}")
+
+SET(COMMON_SRCS_MAIN
+	Led.cpp
+	Button.cpp
+	Protoboard.cpp)
+	
+ADD_EXECUTABLE(DroneKTU DroneKTU.cpp ${COMMON_SRCS_MAIN}) 
+
+
