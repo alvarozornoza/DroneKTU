@@ -15,6 +15,10 @@
 //
 // Copyright (C) 2017 Alvaro Zornoza
 //
+// This app included some libraries and code from DJI. DJI is the 
+// only owner of next subfolders and their respective files:
+// /contrib, /osdk-core, /osdk-wrapper, /platform
+//
 // DroneKTU is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published 
 // by the Free Software Foundation, either version 3 of the License, 
