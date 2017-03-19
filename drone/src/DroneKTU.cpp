@@ -15,6 +15,10 @@
 //
 // DroneKTU. Copyright (C) 2017 Alvaro Zornoza
 //
+// This app included some libraries and code from DJI. DJI is the 
+// only owner of next subfolders and their respective files:
+// /contrib, /osdk-core, /osdk-wrapper, /platform
+//
 // DroneKTU is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published 
 // by the Free Software Foundation, either version 3 of the License, 
@@ -91,11 +95,22 @@ int main(int argc,char* argv[])
 	std::cout << "This program will exit now. \n";
 	return 0;
 	}
+
 	//! Set broadcast Freq Defaults
 	unsigned short broadcastAck = api->setBroadcastFreqDefaults(1);
+  	usleep(500000);
 
 	p=flight->getPosition();
 
+	int cleanupStatus = cleanup(serialDevice, api, flight, &read);
+	if (cleanupStatus == -1)
+	{
+		std::cout << "Unable to cleanly destroy OSDK infrastructure. There may be residual objects in the system memory.\n";
+		return 0;
+	}
+	std::cout << "Program exited successfully." << std::endl;
+
+	
 	std::cout<<"Press enter to continue ..."<<std::endl;
 	std::cin.get();
 	return 0;
