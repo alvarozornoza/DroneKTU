@@ -41,6 +41,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <time.h>
 
 //DJI Linux Application Headers
 #include "LinuxSerialDevice.h"
@@ -95,7 +96,7 @@ int main(int argc,char* argv[])
 	std::cout<<"DroneKTU. Copyright (C) 2017 Alvaro Zornoza"<<std::endl<<std::endl;
 	
 
-	/*//! Setup
+	// Setup
 	int setupStatus = setup(serialDevice, api, &read);
 	if (setupStatus == -1)
 	{
@@ -105,45 +106,52 @@ int main(int argc,char* argv[])
 
 	//! Set broadcast Freq Defaults
 	unsigned short broadcastAck = api->setBroadcastFreqDefaults(1);
-  	usleep(500000);*/
+  	usleep(500000);
 
-	//Managing local time and hour for file name
-	/*time_t tiempo = time(0);
+	//Managing local time for file name
+	time_t tiempo = time(0);
 	struct tm *tlocal = localtime(&tiempo);
 	char output[128];
 	strftime(output, 128, "%d-%m-%y_%H.%M.%S", tlocal);
-	printf("Fecha y Hora: %s\n\n",output);*/
+	//printf("Date and time (DD-MM-YYYY_HH.MM.SS): %s\n\n",output);
 	
-	/*int fd;
+	
+	int fd;
 	char buf[100];
-	sprintf(buf,"../../result/hola");
+	sprintf(buf,"../../results/%s",output);
 	fd=open(buf,O_WRONLY|O_CREAT|O_TRUNC,0666);
-	if(fd==-1)
+	if(fd<0)
 		std::cout<<"Error creando el archivo..."<<std::endl;
 
 	char cadcs[200];
-	sprintf(cadcs,"LaVida\n %d",EOF);
-	if((write(fd,cadcs,sizeof(cadcs)))==-1);
-		std::cout<<"Error escribiendo en el archivo..."<<std::endl;
+	sprintf(cadcs,"Latitude;Longitude;Altitude;Height;Health\n");
+	write(fd,cadcs,strlen(cadcs));
+	for(int i=0;i<10;i++)
+	{	
+		p=flight->getPosition();
+		sprintf(cadcs,"%f;%f;%f;%f;%d\n",p.latitude,p.longitude,p.altitude,p.height,p.health);
+		write(fd,cadcs,strlen(cadcs));
+		usleep(100);
+		//std::cout<<"Error escribiendo en el archivo..."<<std::endl;
+	}
 		
 	close(fd);
-*/
-	std::cout<<"Please press the button to run the process..."<<std::endl;
+
+	/*std::cout<<"Please press the button to run the process..."<<std::endl;
 	while(1)
 	{
 		if(!(myproto.MyButton.ButtonStatus()))
 			break;
-	}
+	}*/
 
-	p=flight->getPosition();
-
-	/*int cleanupStatus = cleanup(serialDevice, api, flight, &read);
+	
+	int cleanupStatus = cleanup(serialDevice, api, flight, &read);
 	if (cleanupStatus == -1)
 	{
 		std::cout << "Unable to cleanly destroy OSDK infrastructure. There may be residual objects in the system memory.\n";
 		return 0;
 	}
-	std::cout << "Program exited successfully." << std::endl;*/
+	std::cout << "Program exited successfully." << std::endl;
 
 	
 	std::cout<<"Press enter to continue ..."<<std::endl;
