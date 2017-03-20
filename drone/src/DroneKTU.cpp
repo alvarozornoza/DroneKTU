@@ -97,7 +97,7 @@ int main(int argc,char* argv[])
 	
 
 	// Setup
-	int setupStatus = setup(serialDevice, api, &read);
+	/*int setupStatus = setup(serialDevice, api, &read);
 	if (setupStatus == -1)
 	{
 	std::cout << "This program will exit now. \n";
@@ -106,7 +106,7 @@ int main(int argc,char* argv[])
 
 	//! Set broadcast Freq Defaults
 	unsigned short broadcastAck = api->setBroadcastFreqDefaults(1);
-  	usleep(500000);
+  	usleep(500000);*/
 
 	//Managing local time for file name
 	time_t tiempo = time(0);
@@ -118,7 +118,7 @@ int main(int argc,char* argv[])
 	
 	int fd;
 	char buf[100];
-	sprintf(buf,"../../results/%s",output);
+	sprintf(buf,"/home/azornoza/DroneKTU/results/%s",output);
 	fd=open(buf,O_WRONLY|O_CREAT|O_TRUNC,0666);
 	if(fd<0)
 		std::cout<<"Error creando el archivo..."<<std::endl;
@@ -137,21 +137,21 @@ int main(int argc,char* argv[])
 		
 	close(fd);
 
-	/*std::cout<<"Please press the button to run the process..."<<std::endl;
+	std::cout<<"Please press the button to run the process..."<<std::endl;
 	while(1)
 	{
 		if(!(myproto.MyButton.ButtonStatus()))
 			break;
-	}*/
+	}
 
 	
-	int cleanupStatus = cleanup(serialDevice, api, flight, &read);
+	/*int cleanupStatus = cleanup(serialDevice, api, flight, &read);
 	if (cleanupStatus == -1)
 	{
 		std::cout << "Unable to cleanly destroy OSDK infrastructure. There may be residual objects in the system memory.\n";
 		return 0;
 	}
-	std::cout << "Program exited successfully." << std::endl;
+	std::cout << "Program exited successfully." << std::endl;*/
 
 	
 	std::cout<<"Press enter to continue ..."<<std::endl;
