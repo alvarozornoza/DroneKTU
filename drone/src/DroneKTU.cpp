@@ -65,7 +65,7 @@
 //User Headers
 
 #include "Protoboard.h"
-#include "SIM800L.h"
+#include "Modem.h"
 
 //using namespace std;
 
@@ -74,12 +74,11 @@ using namespace DJI;
 using namespace DJI::onboardSDK;
 
 void clean_stdin(void);
-inline double to_degrees(double radians){
-	return radians*(180.0/M_PI);
-}
+inline double to_degrees(double radians);
 
 int main(int argc,char* argv[])
 {
+	std::cout<<"DroneKTU. Copyright (C) 2017 Alvaro Zornoza"<<std::endl<<std::endl;
 	//Managing the connection with M100
 
 	LinuxSerialDevice* serialDevice = new LinuxSerialDevice(UserConfig::deviceName, UserConfig::baudRate);
@@ -93,14 +92,20 @@ int main(int argc,char* argv[])
 
 	PositionData p;
 
-	//Managing the attahed protoboard
-   	Protoboard myproto; 
+	//Managing the protoboard
+   	Protoboard myProto; 
 
-	//Proto.MyLed.LedOn();
+	//Managing the modem
+	Modem myModem;
 
-	std::cout<<"DroneKTU. Copyright (C) 2017 Alvaro Zornoza"<<std::endl<<std::endl;
+	//Starting the process
+	std::cout<<"Please press the button to run the process..."<<std::endl;
+	while(1)
+	{
+		if(!(myProto.MyButton.ButtonStatus()))
+			break;
+	}
 	
-
 	// Setup
 	int setupStatus = setup(serialDevice, api, &read);
 	if (setupStatus == -1)
@@ -132,9 +137,12 @@ int main(int argc,char* argv[])
 	//char title[200];
 	//sprintf(title,"Latitude;Longitude;Altitude;Height;Health\n");
 	//write(fd,title,strlen(title));
+	
+	//while(!(myProto.MyButton.ButtonStatus()))
 	for(int i=0;i<100000;i++)
 	{	
 		p=flight->getPosition();
+		myModem.getSignalQuality();
 		sprintf(cadcs,"%lf;%lf;%f;%f;%i\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health);
 		printf("%s",cadcs);
 		//write(fd,cadcs,strlen(cadcs));
@@ -142,13 +150,6 @@ int main(int argc,char* argv[])
 	}
 		
 	close(fd);
-
-	std::cout<<"Please press the button to run the process..."<<std::endl;
-	while(1)
-	{
-		if(!(myproto.MyButton.ButtonStatus()))
-			break;
-	}
 
 	
 	int cleanupStatus = cleanup(serialDevice, api, flight, &read);
@@ -171,5 +172,9 @@ void clean_stdin(void)
 	do {
 		c=getchar();
 	} while ((c!='\n')&&(c!=EOF));
+}
+
+inline double to_degrees(double radians){
+	return radians*(180.0/M_PI);
 }
 

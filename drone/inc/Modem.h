@@ -38,11 +38,35 @@
 #ifndef INC_MODEM_H_
 #define INC_MODEM_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <termios.h>
+#include <iostream>
+
+#include "SerialStream.h"
+
+//std::string p="/dev/ttys0";
+//const std::string& port=p;
+
+using namespace LibSerial;
+
 class Modem
 {
 public:	
+	SerialStream SIM;
+	
 	Modem();
 	virtual ~Modem();
+	void begin();
+	void getSignalQuality();
+
+	int fd;
+	
+	
 		
 };
 

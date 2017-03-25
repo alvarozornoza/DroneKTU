@@ -40,10 +40,54 @@
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+
+using namespace std;
+
 Modem::Modem()
-{
+{	
+	begin();
 }
 
 Modem::~Modem()
 {
+	SIM.Close();
 }
+
+//////////////////////////////////////////////////////////////////////
+// Methods
+//////////////////////////////////////////////////////////////////////
+
+void Modem::begin()
+{
+	SIM.Open("/dev/ttyS0");
+	SIM.SetBaudRate(SerialStreamBuf::BAUD_115200);
+	SIM.SetCharSize(SerialStreamBuf::CHAR_SIZE_8);
+	SIM.SetNumOfStopBits(1);
+	SIM.SetParity(SerialStreamBuf::PARITY_ODD);
+	SIM.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_HARD);
+}
+
+void Modem::getSignalQuality()
+{
+/*response 
++CSQ: <rssi>,<ber>Parameters
+<rssi>
+0 -115 dBm or less
+1 -111 dBm or less
+1...30 -110...-54 dBm
+31 -52 dBm or greater
+99 not known or not detectable
+<ber> (in percent)
+0...7 As RXQUAL values in the table in GSM 05.08 [20] subclause 7.2.4
+99 not known or not detectable
+*/
+
+	char command[]="AT+CSQ\r\n";
+	SIM.write(command,sizeof(command));
+	const int BUFFER_SIZE=256;
+	char input_buffer[BUFFER_SIZE];
+	SIM.read(input_buffer,BUFFER_SIZE);
+	//Serial
+}
+
+
