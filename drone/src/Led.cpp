@@ -92,12 +92,15 @@ void Led::LedOff()
 	write(fd,"0",1);
 }
 
-void Led::LedBlink(int time)
+void Led::LedBlink(int times, int time)
 {
-	LedOn();
-	sleep(time/2);
-	LedOff();
-	sleep(time/2);
+	for(int i=0;i<times;i++)
+	{
+		LedOn();
+		sleep(time/2);
+		LedOff();
+		sleep(time/2);
+	}
 }
 
 

@@ -48,7 +48,7 @@ public:
 	//int  LedStatus();
 	void LedOn();
 	void LedOff();
-	void LedBlink(int time); // Time sets the period of blinking in seconds
+	void LedBlink(int times, int time=1); // Time sets the period of blinking in seconds
 };
 
 

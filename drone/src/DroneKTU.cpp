@@ -79,6 +79,7 @@ inline double to_degrees(double radians);
 int main(int argc,char* argv[])
 {
 	std::cout<<"DroneKTU. Copyright (C) 2017 Alvaro Zornoza"<<std::endl<<std::endl;
+	
 	//Managing the connection with M100
 
 	LinuxSerialDevice* serialDevice = new LinuxSerialDevice(UserConfig::deviceName, UserConfig::baudRate);
@@ -89,7 +90,6 @@ int main(int argc,char* argv[])
 	LinuxThread read(api, 2);
 
 	//Managing the telemetry data
-
 	PositionData p;
 
 	//Managing the protoboard
@@ -102,16 +102,25 @@ int main(int argc,char* argv[])
 	std::cout<<"Please press the button to run the process..."<<std::endl;
 	while(1)
 	{
-		if(!(myProto.MyButton.ButtonStatus()))
+		if((myProto.MyButton.ButtonStatus()))
 			break;
 	}
 	
 	// Setup
+	int setupModem = myModem.begin();
+	if (setupModem = 0)
+	{
+		std::cout << "ERROR: It was not possible to connect with the Modem SIM800L. This program will exit now. \n"; //The led blinks twice to show the error.
+		myProto.MyLed.LedBlink(2);
+		return 0;
+	}
+
 	int setupStatus = setup(serialDevice, api, &read);
 	if (setupStatus == -1)
 	{
-	std::cout << "This program will exit now. \n";
-	return 0;
+		std::cout << "ERROR: It was not possible to connect with the Matrice 100.This program will exit now. \n"; //The led blinks four times to show the error.
+		myProto.MyLed.LedBlink(4);
+		return 0;
 	}
 
 	//! Set broadcast Freq Defaults
@@ -131,20 +140,25 @@ int main(int argc,char* argv[])
 	sprintf(buf,"/home/ubuntu/DroneKTU/results/%s",output);
 	fd=open(buf,O_WRONLY|O_CREAT|O_TRUNC,0666);
 	if(fd<0)
-		std::cout<<"Error creando el archivo..."<<std::endl;
-
-	char cadcs[1000];
+	{
+		std::cout << "ERROR: It was not possible to connect with the Matrice 100.This program will exit now. \n"; //The led blinks six times to show the error.
+		myProto.MyLed.LedBlink(6);
+		return 0;
+	}
+	
 	//char title[200];
 	//sprintf(title,"Latitude;Longitude;Altitude;Height;Health\n");
 	//write(fd,title,strlen(title));
 	
 	//while(!(myProto.MyButton.ButtonStatus()))
-	for(int i=0;i<100000;i++)
+	while(myProto.MyButton.ButtonStatus())
 	{	
+		char* type=myModem.getSignalQuality();	
+		char cadcs[100];
 		p=flight->getPosition();
-		myModem.getSignalQuality();
-		sprintf(cadcs,"%lf;%lf;%f;%f;%i\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health);
+		sprintf(cadcs,"%lf;%lf;%f;%f;%i;%s\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,type);
 		printf("%s",cadcs);
+		free(type);
 		//write(fd,cadcs,strlen(cadcs));
 		usleep(100);
 	}

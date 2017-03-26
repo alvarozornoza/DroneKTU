@@ -57,17 +57,23 @@ Modem::~Modem()
 // Methods
 //////////////////////////////////////////////////////////////////////
 
-void Modem::begin()
+int Modem::begin()
 {
 	SIM.Open("/dev/ttyS0");
-	SIM.SetBaudRate(SerialStreamBuf::BAUD_115200);
-	SIM.SetCharSize(SerialStreamBuf::CHAR_SIZE_8);
-	SIM.SetNumOfStopBits(1);
-	SIM.SetParity(SerialStreamBuf::PARITY_ODD);
-	SIM.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_HARD);
+	if(!(SIM.IsOpen()))
+		return 0;
+	else
+	{	
+		SIM.SetBaudRate(SerialStreamBuf::BAUD_115200);
+		SIM.SetCharSize(SerialStreamBuf::CHAR_SIZE_8);
+		SIM.SetNumOfStopBits(1);
+		SIM.SetParity(SerialStreamBuf::PARITY_ODD);
+		SIM.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_HARD);
+		return 1;
+	}
 }
 
-void Modem::getSignalQuality()
+char* Modem::getSignalQuality()
 {
 /*response 
 +CSQ: <rssi>,<ber>Parameters
@@ -84,10 +90,14 @@ void Modem::getSignalQuality()
 
 	char command[]="AT+CSQ\r\n";
 	SIM.write(command,sizeof(command));
-	const int BUFFER_SIZE=256;
+	usleep(100);
+
+	const int BUFFER_SIZE=10;
 	char input_buffer[BUFFER_SIZE];
 	SIM.read(input_buffer,BUFFER_SIZE);
-	//Serial
+	char *type=(char*)malloc(strlen(input_buffer));
+	strncpy(type,input_buffer,BUFFER_SIZE-1);
+	return(type);
 }
 
 

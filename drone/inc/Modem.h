@@ -57,15 +57,13 @@ using namespace LibSerial;
 class Modem
 {
 public:	
-	SerialStream SIM;
-	
 	Modem();
 	virtual ~Modem();
-	void begin();
-	void getSignalQuality();
+	int begin();
+	char* getSignalQuality();
 
 	int fd;
-	
+	SerialStream SIM;
 	
 		
 };
