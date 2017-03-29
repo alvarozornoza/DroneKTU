@@ -35,7 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "Modem.h"
+#include "SerialInterface.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -50,7 +50,7 @@ Modem::Modem()
 
 Modem::~Modem()
 {
-	SIM.Close();
+	SIM.close_serial();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -59,7 +59,15 @@ Modem::~Modem()
 
 int Modem::begin()
 {
-	SIM.Open("/dev/ttyS0");
+	int setup;
+	setup=SIM.open_serial_dev(DEFAULT_PI_SERIAL_PORT);
+	if(setup)
+		SIM.serial_init();
+	return setup;
+
+
+
+	/*SIM.Open("/dev/ttyS0");
 	if(!(SIM.IsOpen()))
 		return 0;
 	else
@@ -70,10 +78,10 @@ int Modem::begin()
 		SIM.SetParity(SerialStreamBuf::PARITY_ODD);
 		SIM.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_HARD);
 		return 1;
-	}
+	}*/
 }
 
-char* Modem::getSignalQuality()
+int Modem::getSignalQuality()
 {
 /*response 
 +CSQ: <rssi>,<ber>Parameters
@@ -87,9 +95,12 @@ char* Modem::getSignalQuality()
 0...7 As RXQUAL values in the table in GSM 05.08 [20] subclause 7.2.4
 99 not known or not detectable
 */
-
 	char command[]="AT+CSQ\r\n";
-	SIM.write(command,sizeof(command));
+	char response[20];
+	response=SIM.set_get_cmd(command);
+
+
+/*	SIM.write(command,sizeof(command));
 	usleep(100);
 
 	const int BUFFER_SIZE=10;
@@ -97,7 +108,17 @@ char* Modem::getSignalQuality()
 	SIM.read(input_buffer,BUFFER_SIZE);
 	char *type=(char*)malloc(strlen(input_buffer));
 	strncpy(type,input_buffer,BUFFER_SIZE-1);
-	return(type);
-}
+	return(type);*/
 
+
+	for(i=0; i<rv; i++){
+		if(!(buf[i] >= '0' || buf[i] <= '9'))
+			break;
+	}
+	char string_num[2];
+	string_num=buf.substr(i,rv-4);
+	int num;
+	num=atoi(string_num);
+	return(-112+num*2);
+}
 

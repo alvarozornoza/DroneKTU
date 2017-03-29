@@ -1,4 +1,4 @@
-// Modem.h: interface for the Modem class.
+// SerialInterface.cpp: interface for SerialInterface class.
 //
 //////////////////////////////////////////////////////////////////////
 //
@@ -35,32 +35,23 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef INC_MODEM_H_
-#define INC_MODEM_H_
+#ifndef INC_SERIALINTERFACE_H_
+#define INC_SERIALINTERFACE_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <termios.h>
-#include <iostream>
-
-#include "SerialInterface.h"
-
-#define DEFAULT_PI_SERIAL_PORT "/dev/ttyTHS0"
-
-class Modem
+class SerialInterface
 {
-public:	
-	Modem();
-	virtual ~Modem();
-	int begin();
-	int getSignalQuality();
-
-	SerialInterface SIM;
+public:
+	int fd;
+	SerialInterface(void);
+	virtual ~SerialInterface(void);
+	int open_serial(char* serial_dev);
 	
+	int serial_init();
+	char* read_port(int ret);
+	int  write_port(char * cmd, int len);
+	char* set_get_cmd(char * cmd_str);
+	void set_cmd(char * cmd, char * cmd_str);
+	void close_serial(void);
 };
 
-#endif /* INC_MODEM_H_ */
+#endif /* INC_SERIALINTERFACE_H_ */

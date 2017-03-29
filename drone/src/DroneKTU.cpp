@@ -153,12 +153,10 @@ int main(int argc,char* argv[])
 	//while(!(myProto.MyButton.ButtonStatus()))
 	while(myProto.MyButton.ButtonStatus())
 	{	
-		char* type=myModem.getSignalQuality();	
 		char cadcs[100];
 		p=flight->getPosition();
-		sprintf(cadcs,"%lf;%lf;%f;%f;%i;%s\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,type);
+		sprintf(cadcs,"%lf;%lf;%f;%f;%i;%s\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,myModem.getSignalQuality());
 		printf("%s",cadcs);
-		free(type);
 		//write(fd,cadcs,strlen(cadcs));
 		usleep(100);
 	}

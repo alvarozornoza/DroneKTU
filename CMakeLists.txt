@@ -15,5 +15,4 @@ add_subdirectory(osdk-core)
 add_subdirectory(osdk-wrapper)
 add_subdirectory(platform/linux)
 add_subdirectory(drone)
-add_subdirectory(libserial)
 
