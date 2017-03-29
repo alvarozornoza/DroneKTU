@@ -35,6 +35,13 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>   /* File Control Definitions           */
+#include <termios.h> /* POSIX Terminal Control Definitions */
+#include <unistd.h>  /* UNIX Standard Definitions 	   */ 
+#include <errno.h>   /* ERROR Number Definitions           */
+
 #ifndef INC_SERIALINTERFACE_H_
 #define INC_SERIALINTERFACE_H_
 
@@ -42,15 +49,16 @@ class SerialInterface
 {
 public:
 	int fd;
+	char* respuesta;
 	SerialInterface(void);
 	virtual ~SerialInterface(void);
 	int open_serial(char* serial_dev);
 	
 	int serial_init();
-	char* read_port(int ret);
-	int  write_port(char * cmd, int len);
-	char* set_get_cmd(char * cmd_str);
-	void set_cmd(char * cmd, char * cmd_str);
+	int read_port(int ret);
+	int write_port(char* cmd, int len);
+	void set_get_cmd(char* cmd_str);
+	void set_cmd(char* cmd, char * cmd_str);
 	void close_serial(void);
 };
 

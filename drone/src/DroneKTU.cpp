@@ -78,6 +78,7 @@ inline double to_degrees(double radians);
 
 int main(int argc,char* argv[])
 {
+	
 	std::cout<<"DroneKTU. Copyright (C) 2017 Alvaro Zornoza"<<std::endl<<std::endl;
 	
 	//Managing the connection with M100
@@ -99,7 +100,10 @@ int main(int argc,char* argv[])
 	Modem myModem;
 
 	//Starting the process
-	std::cout<<"Please press the button to run the process..."<<std::endl;
+
+myProto.MyLed.LedOff();
+
+	/*std::cout<<"Please press the button to run the process..."<<std::endl;
 	while(1)
 	{
 		if((myProto.MyButton.ButtonStatus()))
@@ -155,7 +159,7 @@ int main(int argc,char* argv[])
 	{	
 		char cadcs[100];
 		p=flight->getPosition();
-		sprintf(cadcs,"%lf;%lf;%f;%f;%i;%s\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,myModem.getSignalQuality());
+		sprintf(cadcs,"%lf;%lf;%f;%f;%i;%i\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,myModem.getSignalQuality());
 		printf("%s",cadcs);
 		//write(fd,cadcs,strlen(cadcs));
 		usleep(100);
@@ -175,7 +179,7 @@ int main(int argc,char* argv[])
 	
 	std::cout<<"Press enter to continue ..."<<std::endl;
 	std::cin.get();
-	return 0;
+	return 0;*/
 }
 
 void clean_stdin(void)

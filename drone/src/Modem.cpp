@@ -36,6 +36,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "SerialInterface.h"
+#include "Modem.h"
+
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -60,7 +62,7 @@ Modem::~Modem()
 int Modem::begin()
 {
 	int setup;
-	setup=SIM.open_serial_dev(DEFAULT_PI_SERIAL_PORT);
+	setup=SIM.open_serial(DEFAULT_PI_SERIAL_PORT);
 	if(setup)
 		SIM.serial_init();
 	return setup;
@@ -96,8 +98,8 @@ int Modem::getSignalQuality()
 99 not known or not detectable
 */
 	char command[]="AT+CSQ\r\n";
-	char response[20];
-	response=SIM.set_get_cmd(command);
+	char response[64];
+	SIM.set_get_cmd(command);
 
 
 /*	SIM.write(command,sizeof(command));
@@ -109,16 +111,26 @@ int Modem::getSignalQuality()
 	char *type=(char*)malloc(strlen(input_buffer));
 	strncpy(type,input_buffer,BUFFER_SIZE-1);
 	return(type);*/
-
-
+	
+	int rv=strlen(SIM.respuesta);
+	int i=0;
 	for(i=0; i<rv; i++){
-		if(!(buf[i] >= '0' || buf[i] <= '9'))
+	if((SIM.respuesta[i] >= '0' && SIM.respuesta[i] <= '9'))
 			break;
+		//if((SIM.respuesta[i]==','))
+		//	break;
 	}
-	char string_num[2];
-	string_num=buf.substr(i,rv-4);
+	int size=rv-10-i;
+	char char_number[size];
+	int j=0;
+	for(j=0;j<size;j++)
+	{
+		char_number[j]=SIM.respuesta[i+j];
+	}	
+printf("%s\n\n\n\n",SIM.respuesta);
 	int num;
-	num=atoi(string_num);
+	num=atoi(char_number);
+	//return(size);
 	return(-112+num*2);
 }
 
