@@ -52,7 +52,7 @@
 Led::Led(int gpio):gpio_port(gpio)
 {
 	char buf[100];
-	sprintf(buf,"/sys/class/gpio%d/value",(this->gpio_port));
+	sprintf(buf,"/sys/class/gpio/gpio158/value");
 	fd=open(buf, O_WRONLY);
 }
 

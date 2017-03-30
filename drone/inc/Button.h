@@ -45,8 +45,9 @@ public:
 	virtual ~Button();
 		
 	int gpio_port,fd;
+	
 
-	int ButtonStatus();
+	bool ButtonStatus();
 };
 
 

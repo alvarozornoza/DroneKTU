@@ -53,33 +53,37 @@
 
 Button::Button(int gpio):gpio_port(gpio)
 {
-	char buf[100];
-	sprintf(buf,"/sys/class/gpio%d/value",(this->gpio_port));
-	fd=open(buf, O_RDONLY);
+
 }
 
 
 Button::~Button()
 {
-	close(fd);
+	
 }
 
 //////////////////////////////////////////////////////////////////////
 // Methods
 //////////////////////////////////////////////////////////////////////	
 
-int  Button::ButtonStatus()
+bool Button::ButtonStatus()
 {
+	char buf[100];
+	sprintf(buf,"/sys/class/gpio/gpio157/value");
+	fd=open(buf, O_RDONLY);
 	char value;	
 	read(fd,&value,1);
-	if(value == '0')
-	{ 	
-		return 0; // Current GPIO status low
-	     
-	}
+	if(value=='1')	
+	{
+		
+		return false;
+	}// Current GPIO status low
 	else
 	{
-		return 1; // Current GPIO status high
+		 // Current GPIO status high
+		return true;
 	}
+	close(fd);
+	
 }
 

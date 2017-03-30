@@ -69,6 +69,8 @@
 
 //using namespace std;
 
+#define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD32/results/"
+
 using namespace std;
 using namespace DJI;
 using namespace DJI::onboardSDK;
@@ -78,9 +80,24 @@ inline double to_degrees(double radians);
 
 int main(int argc,char* argv[])
 {
-	
+	//Managing the protoboard
+   	Protoboard myProto; 
+
 	std::cout<<"DroneKTU. Copyright (C) 2017 Alvaro Zornoza"<<std::endl<<std::endl;
+
+	//Starting the process	
+	myProto.MyLed.LedOff();
 	
+	std::cout<<"Please press the button to run the process..."<<std::endl;
+	while(1)
+	{
+		
+		if(myProto.MyButton.ButtonStatus())		
+			break;
+			sleep(1);
+		
+	}
+
 	//Managing the connection with M100
 
 	LinuxSerialDevice* serialDevice = new LinuxSerialDevice(UserConfig::deviceName, UserConfig::baudRate);
@@ -89,26 +106,17 @@ int main(int argc,char* argv[])
 	WayPoint* waypointObj = new WayPoint(api);
 	Camera* camera = new Camera(api);
 	LinuxThread read(api, 2);
+	
+	sleep(2);
 
 	//Managing the telemetry data
 	PositionData p;
 
-	//Managing the protoboard
-   	Protoboard myProto; 
-
 	//Managing the modem
 	Modem myModem;
 
-	//Starting the process
-
-myProto.MyLed.LedOff();
-
-	/*std::cout<<"Please press the button to run the process..."<<std::endl;
-	while(1)
-	{
-		if((myProto.MyButton.ButtonStatus()))
-			break;
-	}
+	
+ 
 	
 	// Setup
 	int setupModem = myModem.begin();
@@ -141,7 +149,7 @@ myProto.MyLed.LedOff();
 	
 	int fd;
 	char buf[100];
-	sprintf(buf,"/home/ubuntu/DroneKTU/results/%s",output);
+	sprintf(buf,"%s%s",DEFAULT_PENDRIVE,output);
 	fd=open(buf,O_WRONLY|O_CREAT|O_TRUNC,0666);
 	if(fd<0)
 	{
@@ -154,15 +162,19 @@ myProto.MyLed.LedOff();
 	//sprintf(title,"Latitude;Longitude;Altitude;Height;Health\n");
 	//write(fd,title,strlen(title));
 	
-	//while(!(myProto.MyButton.ButtonStatus()))
-	while(myProto.MyButton.ButtonStatus())
+	//while((myProto.MyButton.ButtonStatus()))
+	//clean_stdin();
+	myProto.MyLed.LedOn();
+	while(1)
 	{	
 		char cadcs[100];
 		p=flight->getPosition();
-		sprintf(cadcs,"%lf;%lf;%f;%f;%i;%i\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,myModem.getSignalQuality());
+		sprintf(cadcs,"%lf;%lf;%lf;%lf;%i;%i\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,myModem.getSignalQuality());
 		printf("%s",cadcs);
-		//write(fd,cadcs,strlen(cadcs));
-		usleep(100);
+		write(fd,cadcs,strlen(cadcs));
+		usleep(1000);
+		if(myProto.MyButton.ButtonStatus())
+			break;
 	}
 		
 	close(fd);
@@ -175,11 +187,11 @@ myProto.MyLed.LedOff();
 		return 0;
 	}
 	std::cout << "Program exited successfully." << std::endl;
-
+myProto.MyLed.LedOff();
 	
 	std::cout<<"Press enter to continue ..."<<std::endl;
 	std::cin.get();
-	return 0;*/
+	return 0;
 }
 
 void clean_stdin(void)

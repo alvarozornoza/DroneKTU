@@ -127,7 +127,7 @@ int Modem::getSignalQuality()
 	{
 		char_number[j]=SIM.respuesta[i+j];
 	}	
-printf("%s\n\n\n\n",SIM.respuesta);
+//printf("%s\n\n\n\n",SIM.respuesta);
 	int num;
 	num=atoi(char_number);
 	//return(size);
