@@ -69,7 +69,7 @@
 
 //using namespace std;
 
-#define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD32/results/"
+#define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD321/results/"
 
 using namespace std;
 using namespace DJI;
@@ -82,20 +82,21 @@ int main(int argc,char* argv[])
 {
 	//Managing the protoboard
    	Protoboard myProto; 
-
-	std::cout<<"DroneKTU. Copyright (C) 2017 Alvaro Zornoza"<<std::endl<<std::endl;
-
-	//Starting the process	
 	myProto.MyLed.LedOff();
-	
-	std::cout<<"Please press the button to run the process..."<<std::endl;
+	std::cout << "|---------------------------------------------------------------------------|"<< std::endl;
+	std::cout << "|------------------DroneKTU. Copyright (C) 2017 Alvaro Zornoza--------------|"<< std::endl;
+	std::cout << "|---------------------------------------------------------------------------|"<< std::endl;
+
+	std::cout<<""<<std::endl<<std::endl;
+	//Starting the process	
 	while(1)
 	{
-		
-		if(myProto.MyButton.ButtonStatus())		
-			break;
-			sleep(1);
-		
+	std::cout << "|---------------------------------------------------------------------------|" << std::endl;
+	std::cout << "|-Please press the button to run the process or Ctrl+C to close the program-|" << std::endl;
+	std::cout << "|---------------------------------------------------------------------------|" << std::endl;
+	while(!(myProto.MyButton.ButtonStatus()))
+	{
+		usleep(500000);
 	}
 
 	//Managing the connection with M100
@@ -116,23 +117,21 @@ int main(int argc,char* argv[])
 	Modem myModem;
 
 	
- 
-	
 	// Setup
 	int setupModem = myModem.begin();
 	if (setupModem = 0)
 	{
 		std::cout << "ERROR: It was not possible to connect with the Modem SIM800L. This program will exit now. \n"; //The led blinks twice to show the error.
-		myProto.MyLed.LedBlink(2);
-		return 0;
+		myProto.MyLed.LedBlink(10);
+		continue;
 	}
 
 	int setupStatus = setup(serialDevice, api, &read);
 	if (setupStatus == -1)
 	{
 		std::cout << "ERROR: It was not possible to connect with the Matrice 100.This program will exit now. \n"; //The led blinks four times to show the error.
-		myProto.MyLed.LedBlink(4);
-		return 0;
+		myProto.MyLed.LedBlink(15);
+		continue;
 	}
 
 	//! Set broadcast Freq Defaults
@@ -154,8 +153,8 @@ int main(int argc,char* argv[])
 	if(fd<0)
 	{
 		std::cout << "ERROR: It was not possible to connect with the Matrice 100.This program will exit now. \n"; //The led blinks six times to show the error.
-		myProto.MyLed.LedBlink(6);
-		return 0;
+		myProto.MyLed.LedBlink(20);
+		continue;
 	}
 	
 	//char title[200];
@@ -165,19 +164,21 @@ int main(int argc,char* argv[])
 	//while((myProto.MyButton.ButtonStatus()))
 	//clean_stdin();
 	myProto.MyLed.LedOn();
-	while(1)
+	while(!(myProto.MyButton.ButtonStatus()))
 	{	
+		//if(myProto.MyButton.ButtonStatus())
+			//break;
 		char cadcs[100];
 		p=flight->getPosition();
 		sprintf(cadcs,"%lf;%lf;%lf;%lf;%i;%i\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,myModem.getSignalQuality());
 		printf("%s",cadcs);
 		write(fd,cadcs,strlen(cadcs));
-		usleep(1000);
-		if(myProto.MyButton.ButtonStatus())
-			break;
+		usleep(500000);
+		
 	}
 		
 	close(fd);
+	//clean_stdin();
 
 	
 	int cleanupStatus = cleanup(serialDevice, api, flight, &read);
@@ -187,13 +188,14 @@ int main(int argc,char* argv[])
 		return 0;
 	}
 	std::cout << "Program exited successfully." << std::endl;
-myProto.MyLed.LedOff();
+	myProto.MyLed.LedOff();
+	sleep(2);
 	
-	std::cout<<"Press enter to continue ..."<<std::endl;
-	std::cin.get();
-	return 0;
+	//std::cout<<"Press enter to continue ..."<<std::endl;
+	//std::cin.get();
+	//return 0;
 }
-
+}
 void clean_stdin(void)
 {
 	int c;

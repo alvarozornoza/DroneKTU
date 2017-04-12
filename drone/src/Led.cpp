@@ -95,11 +95,11 @@ void Led::LedOff()
 void Led::LedBlink(int times, int time)
 {
 	for(int i=0;i<times;i++)
-	{
+	{	
 		LedOn();
-		sleep(time/2);
+		usleep(time/2);
 		LedOff();
-		sleep(time/2);
+		usleep(time/2);
 	}
 }
 
