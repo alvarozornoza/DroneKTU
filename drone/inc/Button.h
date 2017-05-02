@@ -41,11 +41,10 @@
 class Button
 {
 public:	
-	Button(int);
+	Button();
 	virtual ~Button();
 		
-	int gpio_port,fd;
-	
+	int fd;
 
 	bool ButtonStatus();
 };

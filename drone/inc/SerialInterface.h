@@ -48,12 +48,13 @@
 class SerialInterface
 {
 public:
-	int fd;
-	char* respuesta;
 	SerialInterface(void);
 	virtual ~SerialInterface(void);
-	int open_serial(char* serial_dev);
+
+	int fd;
+	char* respuesta;
 	
+	int open_serial(char* serial_dev);
 	int serial_init();
 	int read_port(int ret);
 	int write_port(char* cmd, int len);

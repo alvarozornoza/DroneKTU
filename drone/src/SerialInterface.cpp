@@ -45,19 +45,19 @@ SerialInterface::SerialInterface(void)
 {
 }
 
-
 SerialInterface::~SerialInterface(void)
 {
 }
 
-
+//////////////////////////////////////////////////////////////////////
+// Methods
+//////////////////////////////////////////////////////////////////////
 
 int SerialInterface::open_serial(char* serial_dev)
 {
 	fd=open(serial_dev,O_RDWR|O_NOCTTY|O_NDELAY);
-	if (fd<0){
-			return 0;
-	}
+	if (fd<0)
+		return 0;
 	return 1;
 }
 
@@ -85,8 +85,8 @@ int SerialInterface::serial_init()
 
 	ret = tcsetattr (fd, TCSANOW, &termios);
 	if(ret < 0){
-	printf("tcsetattr failed\n");
-	return -1;
+		printf("tcsetattr failed\n");
+		return -1;
 	}
 	return 0;
 }
@@ -95,21 +95,10 @@ int SerialInterface::serial_init()
 int SerialInterface::read_port(int ret)
 {
 	int rv = 0;
-	//   int i = 0;
 	char buf[64];
 	respuesta=buf;
-	if(ret){
+	if(ret)
 		rv = read(fd, &buf, sizeof(buf));
-	
-	// printf("Read from port\t: ");
-	//for(i=0; i<rv; i++){
-	  //  if(buf[i] == '\n' || buf[i] == '\r') continue;
-
-	//        printf("%c", buf[i]);
-	//  }
-	//printf("\n");
-	}
-
 	return rv;
 }
 
@@ -121,13 +110,10 @@ int SerialInterface::write_port(char * cmd, int len)
 		return -1;
 	}
 
-	// printf("Writing to Port\t: %s", cmd);
-
 	int ret = 0;
 	ret = write(fd, cmd, len);
-	if(ret <= 0){
-	printf("write failed\n");
-	}
+	if(ret <= 0)
+		printf("write failed\n");
 	return ret;
 }
 
@@ -139,10 +125,7 @@ void SerialInterface::set_get_cmd(char * cmd_str)
 	set_cmd(cmd, cmd_str);
 	ret = write_port(cmd, strlen(cmd));
 	usleep(100000);
-	read_port(ret);
-//printf("%s\n\n\n\n",response);
-	
-	
+	read_port(ret);	
 }
 
 

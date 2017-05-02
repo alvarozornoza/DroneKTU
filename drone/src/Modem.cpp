@@ -38,7 +38,6 @@
 #include "SerialInterface.h"
 #include "Modem.h"
 
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -66,59 +65,31 @@ int Modem::begin()
 	if(setup)
 		SIM.serial_init();
 	return setup;
-
-
-
-	/*SIM.Open("/dev/ttyS0");
-	if(!(SIM.IsOpen()))
-		return 0;
-	else
-	{	
-		SIM.SetBaudRate(SerialStreamBuf::BAUD_115200);
-		SIM.SetCharSize(SerialStreamBuf::CHAR_SIZE_8);
-		SIM.SetNumOfStopBits(1);
-		SIM.SetParity(SerialStreamBuf::PARITY_ODD);
-		SIM.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_HARD);
-		return 1;
-	}*/
 }
 
 int Modem::getSignalQuality()
 {
-/*response 
-+CSQ: <rssi>,<ber>Parameters
-<rssi>
-0 -115 dBm or less
-1 -111 dBm or less
-1...30 -110...-54 dBm
-31 -52 dBm or greater
-99 not known or not detectable
-<ber> (in percent)
-0...7 As RXQUAL values in the table in GSM 05.08 [20] subclause 7.2.4
-99 not known or not detectable
-*/
+	/*response 
+	+CSQ: <rssi>,<ber>Parameters
+	<rssi>
+	0 -115 dBm or less
+	1 -111 dBm or less
+	1...30 -110...-54 dBm
+	31 -52 dBm or greater
+	99 not known or not detectable
+	<ber> (in percent)
+	0...7 As RXQUAL values in the table in GSM 05.08 [20] subclause 7.2.4
+	99 not known or not detectable
+	*/
+
 	char command[]="AT+CSQ\r\n";
 	char response[64];
 	SIM.set_get_cmd(command);
-
-
-/*	SIM.write(command,sizeof(command));
-	usleep(100);
-
-	const int BUFFER_SIZE=10;
-	char input_buffer[BUFFER_SIZE];
-	SIM.read(input_buffer,BUFFER_SIZE);
-	char *type=(char*)malloc(strlen(input_buffer));
-	strncpy(type,input_buffer,BUFFER_SIZE-1);
-	return(type);*/
-	
 	int rv=strlen(SIM.respuesta);
 	int i=0;
 	for(i=0; i<rv; i++){
-	if((SIM.respuesta[i] >= '0' && SIM.respuesta[i] <= '9'))
+		if((SIM.respuesta[i] >= '0' && SIM.respuesta[i] <= '9'))
 			break;
-		//if((SIM.respuesta[i]==','))
-		//	break;
 	}
 	int size=rv-10-i;
 	char char_number[size];
@@ -127,10 +98,8 @@ int Modem::getSignalQuality()
 	{
 		char_number[j]=SIM.respuesta[i+j];
 	}	
-//printf("%s\n\n\n\n",SIM.respuesta);
 	int num;
 	num=atoi(char_number);
-	//return(size);
 	return(-112+num*2);
 }
 

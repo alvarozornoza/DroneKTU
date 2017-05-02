@@ -56,11 +56,11 @@ class Modem
 public:	
 	Modem();
 	virtual ~Modem();
-	int begin();
-	int getSignalQuality();
 
 	SerialInterface SIM;
-	
+
+	int begin();
+	int getSignalQuality();	
 };
 
 #endif /* INC_MODEM_H_ */

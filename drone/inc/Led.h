@@ -40,16 +40,14 @@
 class Led
 {
 public:	
-	Led(int);
+	Led();
 	virtual ~Led();
 		
-	int gpio_port,fd;
+	int fd;
 	
-	//int  LedStatus();
 	void LedOn();
 	void LedOff();
 	void LedBlink(int times, int time=1000000); // Time sets the period of blinking in miliseconds
 };
-
 
 #endif /* INC_LED_H_ */

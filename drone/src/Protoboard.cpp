@@ -40,7 +40,7 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-Protoboard::Protoboard():MyButton(157),MyLed(158)
+Protoboard::Protoboard():MyButton(),MyLed()
 {
 }
 

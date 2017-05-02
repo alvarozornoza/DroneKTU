@@ -48,8 +48,7 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-
-Led::Led(int gpio):gpio_port(gpio)
+Led::Led()
 {
 	char buf[100];
 	sprintf(buf,"/sys/class/gpio/gpio158/value");
@@ -64,22 +63,6 @@ Led::~Led()
 //////////////////////////////////////////////////////////////////////
 // Methods
 //////////////////////////////////////////////////////////////////////
-
-/*int Led::LedStatus()
-{
-	char value;
-	read(fd,&value,1)
-	if(value
-	{
-		cout<<"LED is ON\n";
-		return 1;	
-	}
-	else
-	{
-		cout<<"LED is OFF\n";
-		return 0;
-	}
-}*/
 
 void Led::LedOn()
 {

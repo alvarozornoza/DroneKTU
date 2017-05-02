@@ -45,7 +45,6 @@
 class Protoboard
 {
 public:	
-	//Protoboard(int led, int button);
 	Protoboard();
 	virtual ~Protoboard();
 

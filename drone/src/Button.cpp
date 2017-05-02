@@ -45,13 +45,11 @@
 
 #include "Button.h"
 
-//int fd;	
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-Button::Button(int gpio):gpio_port(gpio)
+Button::Button()
 {
 
 }
@@ -74,16 +72,9 @@ bool Button::ButtonStatus()
 	char value;	
 	read(fd,&value,1);
 	if(value=='1')	
-	{
-		
-		return false;
-	}// Current GPIO status low
+		return false; // Current GPIO status low
 	else
-	{
-		 // Current GPIO status high
-		return true;
-	}
+		 return true; // Current GPIO status high
 	close(fd);
-	
 }
 
