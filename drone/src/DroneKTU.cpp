@@ -69,7 +69,7 @@
 
 //using namespace std;
 
-#define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD321/results/"
+#define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD322/results/"
 
 using namespace std;
 using namespace DJI;
@@ -89,7 +89,7 @@ int main(int argc,char* argv[])
 
 	std::cout<<""<<std::endl<<std::endl;
 	//Starting the process	
-	while(1)
+	while(1) // Despite is a bad programming act, in the only way. I don't have a screen during the flight.
 	{
 	std::cout << "|---------------------------------------------------------------------------|" << std::endl;
 	std::cout << "|-Please press the button to run the process or Ctrl+C to close the program-|" << std::endl;
@@ -122,7 +122,7 @@ int main(int argc,char* argv[])
 	if (setupModem = 0)
 	{
 		std::cout << "ERROR: It was not possible to connect with the Modem SIM800L. This program will exit now. \n"; //The led blinks twice to show the error.
-		myProto.MyLed.LedBlink(10);
+		myProto.MyLed.LedBlink(2);
 		continue;
 	}
 
@@ -130,7 +130,7 @@ int main(int argc,char* argv[])
 	if (setupStatus == -1)
 	{
 		std::cout << "ERROR: It was not possible to connect with the Matrice 100.This program will exit now. \n"; //The led blinks four times to show the error.
-		myProto.MyLed.LedBlink(15);
+		myProto.MyLed.LedBlink(4);
 		continue;
 	}
 
@@ -152,8 +152,8 @@ int main(int argc,char* argv[])
 	fd=open(buf,O_WRONLY|O_CREAT|O_TRUNC,0666);
 	if(fd<0)
 	{
-		std::cout << "ERROR: It was not possible to connect with the Matrice 100.This program will exit now. \n"; //The led blinks six times to show the error.
-		myProto.MyLed.LedBlink(20);
+		std::cout << "ERROR: It was not possible to create to the file or access the pendrive. This program will exit now. \n"; //The led blinks six times to show the error.
+		myProto.MyLed.LedBlink(6);
 		continue;
 	}
 	
@@ -171,7 +171,7 @@ int main(int argc,char* argv[])
 		char cadcs[100];
 		p=flight->getPosition();
 		sprintf(cadcs,"%lf;%lf;%lf;%lf;%i;%i\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,myModem.getSignalQuality());
-		printf("%s",cadcs);
+		printf("%s",cadcs);  //At the same time, the result is shown in the screen and recorded in a file.
 		write(fd,cadcs,strlen(cadcs));
 		usleep(500000);
 		
