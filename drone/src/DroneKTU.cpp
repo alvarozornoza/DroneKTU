@@ -67,7 +67,7 @@
 #include "Protoboard.h"
 #include "Modem.h"
 
-#define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD322/results/"
+#define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD324/results/"
 
 using namespace std;
 using namespace DJI;
@@ -152,16 +152,31 @@ int main(int argc,char* argv[])
 		}
 	
 		//Main process
+		
 		myProto.MyLed.LedOn(); // The led ON shows that the measuring process is running
-		while(!(myProto.MyButton.ButtonStatus()))
+		while(1)
 		{	
+			int counter=0;
 			char cadcs[100];
 			p=flight->getPosition();
 			sprintf(cadcs,"%lf;%lf;%lf;%lf;%i;%i\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,myModem.getSignalQuality());
 			printf("%s",cadcs);  //At the same time, the result is shown in the screen and recorded in a file.
 			write(fd,cadcs,strlen(cadcs));
 			usleep(500000);
-		
+			if((myProto.MyButton.ButtonStatus()))   //Trying to avoid gathering
+			{
+				for(int i=0;i<4;i++)
+				{
+					usleep(200000);
+					if((myProto.MyButton.ButtonStatus()))
+						counter++;
+				}
+				if(counter==4)
+					break;
+				
+			}
+			else
+				continue;
 		}
 
 		//Managing the closing of the file
