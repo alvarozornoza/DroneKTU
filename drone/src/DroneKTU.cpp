@@ -73,14 +73,14 @@ using namespace std;
 using namespace DJI;
 using namespace DJI::onboardSDK;
 
-void clean_stdin(void);
 inline double to_degrees(double radians);
+void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem);
 
 int main(int argc,char* argv[])
 {
 	//Managing the protoboard
    	Protoboard myProto; 
-	myProto.MyLed.LedOff();
+	myProto.MyLed.LedOn();
 	std::cout << "|---------------------------------------------------------------------------|"<< std::endl;
 	std::cout << "|------------------DroneKTU. Copyright (C) 2017 Alvaro Zornoza--------------|"<< std::endl;
 	std::cout << "|---------------------------------------------------------------------------|"<< std::endl;
@@ -152,9 +152,40 @@ int main(int argc,char* argv[])
 		}
 	
 		//Main process
+		char intro[1000];
+		//Measuring time, langitude and longitude, with the drone disarmed
+		p=flight->getPosition();
+		sprintf(intro,"|------------------------------------------------|\n|-DroneKTU. Copyright (C) 2017 Alvaro Zornoza----|\n|------------------------------------------------|\n");
+		write(fd,intro,strlen(intro));
+		printf("%s",intro);
+		//|-Time:%lf --------------------------------------|\n
+		sprintf(intro,"|-DroneKTU v2.0 experiment-----------------------|\n|-Latitude:%lf ----------------------------------|\n|-Longitude:%lf ---------------------------------|\n |------------------------------------------------|\n",to_degrees(p.latitude),to_degrees(p.longitude));
+		write(fd,intro,strlen(intro));
+		printf("%s",intro);
+		std::cout <<  "|-Safety time before taking off (10s countdown)--|" << std::endl;
+		for(int i=10;i>0;i--)
+		{
+			std::cout<<i<<" seconds\n"<< std::endl;
+			myProto.MyLed.LedOn();
+			usleep(500000);
+			myProto.MyLed.LedOff();
+			usleep(500000);
+		}
+		//measure(api,flight,fd,p,myModem);
+		monitoredTakeoff(api, flight);
+		usleep(5000000);
+		for(int i=0;i<5;i++)
+		{
+			std::cout<<"Ascending to "<<5*(i+1)<<"meters/n"<< std::endl;
+			moveByPositionOffset(api, flight, 0, 0, 5*(1.033), 0);
+			usleep(10000000);
+			measure(api,flight,fd,p,myModem);	
+		}
+		landing(api,flight);
 		
-		myProto.MyLed.LedOn(); // The led ON shows that the measuring process is running
-		while(1)
+		
+
+		/*while(1)
 		{	
 			int counter=0;
 			char cadcs[100];
@@ -180,7 +211,7 @@ int main(int argc,char* argv[])
 			else
 				continue;
 		}
-
+		*/
 		//Managing the closing of the file
 		close(fd);
 
@@ -193,7 +224,6 @@ int main(int argc,char* argv[])
 		}
 		std::cout << "Program exited successfully." << std::endl;
 	
-		myProto.MyLed.LedOff(); // The led OFF shows that the measuring process has finished.
 		sleep(2);
 
 	}
@@ -204,3 +234,31 @@ inline double to_degrees(double radians)
 	return radians*(180.0/M_PI);
 }
 
+void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem)
+{	
+	cout<<"|------------Measuring---------------------------|"<<endl;
+	int i=0,j=0;
+	char cadcs[100];
+	int signal[20];
+	double height[20];
+	int signal_sum=0,signal_average=0;
+	double height_sum=0,height_average=0;
+	for(i=0;i<20;i++)
+	{	
+		p=flight->getPosition();
+		height[i]=p.height;
+		signal[i]=myModem.getSignalQuality();
+		cout<<i<<"/20"<<endl;
+		usleep(500000);	
+	}
+	for(j=0;j<20;j++)
+	{	
+		height_sum+=height[j];
+		signal_sum+=signal[j];		
+	}
+	height_average=height_sum/20.0;
+	signal_average=signal_sum/20;
+	sprintf(cadcs,"%lf;%i\n",height_average,signal_average);
+	printf("%s",cadcs);
+	write(fd,cadcs,strlen(cadcs));
+}
