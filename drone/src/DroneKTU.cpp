@@ -165,13 +165,15 @@ int main(int argc,char* argv[])
 			usleep(500000);
 			if((myProto.MyButton.ButtonStatus()))   //Trying to avoid gathering
 			{
-				for(int i=0;i<4;i++)
+				for(int i=0;i<10;i++)
 				{
-					usleep(200000);
+					usleep(100000);
 					if((myProto.MyButton.ButtonStatus()))
 						counter++;
+					else		
+						continue;
 				}
-				if(counter==4)
+				if(counter==10)
 					break;
 				
 			}
