@@ -44,19 +44,19 @@ void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem
 {	
 	cout<<"\nMeasuring"<<endl;
 	char cadcs[100];
-	int signal[numberofvalues];
-	double height[numberofvalues];
+	int signal[numberofvalues+1];
+	double height[numberofvalues+1];
 	double height_average=0, signal_average=0, height_sd=0, signal_sd=0;
 	getData(height,signal,flight,p,myModem);
 	average(height,signal,&height_average,&signal_average);
 	standardDeviation(height,signal,height_average,signal_average,&height_sd,&signal_sd);
-	sprintf(cadcs,"%lf;%lf;%lf;%lf\n\n",height_average,height_sd,signal_average,signal_sd);
-	printf("\n%s",cadcs);
+	sprintf(cadcs,"%lf;%lf;%lf;%lf\n",height_average,height_sd,signal_average,signal_sd);
+	printf("\n%s\n\n",cadcs);
 	write(fd,cadcs,strlen(cadcs));
 }
 void getData(double height[], int signal[], Flight* flight, PositionData p, Modem myModem)
 {
-	for(int i=0;i<numberofvalues;i++)
+	for(int i=0;i<numberofvalues+1;i++)
 	{	
 			p=flight->getPosition();
 			height[i]=p.height;
@@ -69,7 +69,7 @@ void getData(double height[], int signal[], Flight* flight, PositionData p, Mode
 void average(double height[], int signal[], double *height_average, double *signal_average)
 {
 	double height_sum=0,signal_sum=0;
-	for(int j=0;j<numberofvalues;j++)
+	for(int j=1;j<numberofvalues+1;j++)
 	{	
 		height_sum+=height[j];
 		signal_sum+=signal[j];		
@@ -81,7 +81,7 @@ void average(double height[], int signal[], double *height_average, double *sign
 void standardDeviation(double height[], int signal[], double height_average, double signal_average, double *height_sd, double *signal_sd)
 {
 	double height_aux=0,signal_aux=0;	
-	for(int i=0;i<numberofvalues;i++)
+	for(int i=1;i<numberofvalues+1;i++)
 	{
 		height_aux+=pow(height[i]-height_average,2);
 		signal_aux+=pow(signal[i]-signal_average,2);

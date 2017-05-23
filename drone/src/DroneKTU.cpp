@@ -66,19 +66,23 @@
 //User Headers
 #include "Protoboard.h"
 #include "Modem.h"
+#include "Measurement.h"
 
 #define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD324/results/"
+#define altitude 100
+#define interval 5
+#define battery_min_capacity 40
 
 using namespace std;
 using namespace DJI;
 using namespace DJI::onboardSDK;
 
 inline double to_degrees(double radians);
-void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem);
+void countdown(int seconds, bool led, Protoboard myProto);
 
 int main(int argc,char* argv[])
 {
-	//Managing the protoboard
+	//Managing the protoboard.
    	Protoboard myProto; 
 	myProto.MyLed.LedOn();
 	std::cout << "|---------------------------------------------------------------------------|"<< std::endl;
@@ -86,7 +90,7 @@ int main(int argc,char* argv[])
 	std::cout << "|---------------------------------------------------------------------------|"<< std::endl;
 	std::cout<<""<<std::endl<<std::endl;
 
-	//Starting the process	
+	//Starting the process.
 	while(1) // Although is a bad programming practice, in the only way since I do not have a screen during the flight.
 	{
 		std::cout << "|---------------------------------------------------------------------------|" << std::endl;
@@ -97,7 +101,7 @@ int main(int argc,char* argv[])
 			usleep(500000);
 		}
 
-		//Managing the connection with M100
+		//Managing the connection with M100.
 		LinuxSerialDevice* serialDevice = new LinuxSerialDevice(UserConfig::deviceName, UserConfig::baudRate);
 		CoreAPI* api = new CoreAPI(serialDevice);
 		Flight* flight = new Flight(api);
@@ -106,13 +110,15 @@ int main(int argc,char* argv[])
 		LinuxThread read(api, 2);
 		sleep(2);
 
-		//Managing the telemetry data
-		PositionData p;
+		//Managing the telemetry data.
+		PositionData position;
+		BatteryData battery;
+		EulerAngle angle;
 
-		//Managing the modem
+		//Managing the modem.
 		Modem myModem;
 
-		// Setup
+		//Setup.
 		int setupModem = myModem.begin();
 		if (setupModem = 0)
 		{
@@ -129,17 +135,17 @@ int main(int argc,char* argv[])
 			continue;
 		}
 
-		//Set broadcast Freq Defaults
+		//Set broadcast Freq Defaults.
 		unsigned short broadcastAck = api->setBroadcastFreqDefaults(1);
 	  	usleep(500000);
 
-		//Managing local time for file name
+		//Managing local time for file name.
 		time_t tiempo = time(0);
 		struct tm *tlocal = localtime(&tiempo);
 		char output[128];
 		strftime(output, 128, "%d-%m-%y_%H.%M.%S", tlocal);
 	
-		//Managing the opening of the file
+		//Managing the opening of the file.
 		int fd;
 		char buf[100];
 		sprintf(buf,"%s%s",DEFAULT_PENDRIVE,output);
@@ -151,71 +157,70 @@ int main(int argc,char* argv[])
 			continue;
 		}
 	
-		//Main process
+		//Main process.
 		char intro[1000];
-		//Measuring time, langitude and longitude, with the drone disarmed
-		p=flight->getPosition();
-		sprintf(intro,"|------------------------------------------------|\n|-DroneKTU. Copyright (C) 2017 Alvaro Zornoza----|\n|------------------------------------------------|\n");
+
+		//Measuring time, langitude, and longitude with the drone disarmed.
+		position=flight->getPosition();
+		
+		//Measuring battery status.
+		battery=api->getBatteryCapacity();
+
+		//Headlines of the file.
+		sprintf(intro,"\n|------------------------------------------------|\n|-DroneKTU. Copyright (C) 2017 Alvaro Zornoza----|\n|------------------------------------------------|\n\n");
 		write(fd,intro,strlen(intro));
 		printf("%s",intro);
 		//|-Time:%lf --------------------------------------|\n
-		sprintf(intro,"|-DroneKTU v2.0 experiment-----------------------|\n|-Latitude:%lf ----------------------------------|\n|-Longitude:%lf ---------------------------------|\n |------------------------------------------------|\n",to_degrees(p.latitude),to_degrees(p.longitude));
+		
+		//If battery is not charged enough the program will not start and record it in the log.
+		if(battery<battery_min_capacity)
+		{
+			sprintf(intro,"\nERROR: Battery status is %i%. It is not charged enough to start the experiment.\n",battery);
+			write(fd,intro,strlen(intro));
+			printf("%s",intro);
+			myProto.MyLed.LedBlink(8); //The led blinks eight times to show the error.
+			continue;
+		}
+
+		sprintf(intro,"|-DroneKTU v2.0 experiment-----------------------|\n-Latitude:%lf \n-Longitude:%lf \n-Battery:%i \n|------------------------------------------------|\n\n",to_degrees(position.latitude),to_degrees(position.longitude),battery);
 		write(fd,intro,strlen(intro));
 		printf("%s",intro);
-		std::cout <<  "|-Safety time before taking off (10s countdown)--|" << std::endl;
-		for(int i=10;i>0;i--)
-		{
-			std::cout<<i<<" seconds\n"<< std::endl;
-			myProto.MyLed.LedOn();
-			usleep(500000);
-			myProto.MyLed.LedOff();
-			usleep(500000);
-		}
-		//measure(api,flight,fd,p,myModem);
+
+		std::cout <<"Safety time before taking off (10s countdown)" << std::endl;
+		countdown(10,true,myProto);
+		
+		//Taking off.
 		monitoredTakeoff(api, flight);
-		usleep(5000000);
-		for(int i=0;i<5;i++)
+		sleep(2);
+
+		//Measuring euler angle.
+		angle=flight->getEulerAngle();
+
+		//Calculating the number of steps based on the altitude and the interval desired.
+		int steps=altitude/interval;
+		
+		//Main loop. Ascending and measeuring in each step.
+		for(int m=0;m<steps;m++)
 		{
-			std::cout<<"Ascending to "<<5*(i+1)<<"meters/n"<< std::endl;
-			moveByPositionOffset(api, flight, 0, 0, 5*(1.033), 0);
-			usleep(10000000);
-			measure(api,flight,fd,p,myModem);	
+			std::cout<<"Ascending to "<<5*(m+1)<<" meters\n"<< std::endl;
+			position=flight->getPosition();
+			moveByPositionOffset2(api, flight,(((5*(m+1))-position.height)*1.033),to_degrees(angle.yaw));
+			cout<<"Waiting 10 seconds before measuring"<<endl;
+			countdown(10,false,myProto);
+			measure(api,flight,fd,position,myModem);
 		}
 		landing(api,flight);
-		
-		
 
-		/*while(1)
-		{	
-			int counter=0;
-			char cadcs[100];
-			p=flight->getPosition();
-			sprintf(cadcs,"%lf;%lf;%lf;%lf;%i;%i\n",to_degrees(p.latitude),to_degrees(p.longitude),p.altitude,p.height,p.health,myModem.getSignalQuality());
-			printf("%s",cadcs);  //At the same time, the result is shown in the screen and recorded in a file.
-			write(fd,cadcs,strlen(cadcs));
-			usleep(500000);
-			if((myProto.MyButton.ButtonStatus()))   //Trying to avoid gathering
-			{
-				for(int i=0;i<10;i++)
-				{
-					usleep(100000);
-					if((myProto.MyButton.ButtonStatus()))
-						counter++;
-					else		
-						continue;
-				}
-				if(counter==10)
-					break;
-				
-			}
-			else
-				continue;
-		}
-		*/
-		//Managing the closing of the file
+	
+		//Managing the closing of the file.
+		char end[1000];
+		battery=api->getBatteryCapacity();
+		sprintf(end,"\nExperiment runned sucessfully. Battery status: %i%\n",battery);
+		write(fd,end,strlen(end));
+		printf("%s",end);
 		close(fd);
 
-		//Managing desconecction with Matrice 100
+		//Managing desconecction with Matrice 100.
 		int cleanupStatus = cleanup(serialDevice, api, flight, &read);
 		if (cleanupStatus == -1)
 		{
@@ -223,9 +228,11 @@ int main(int argc,char* argv[])
 			return 0;
 		}
 		std::cout << "Program exited successfully." << std::endl;
-	
-		sleep(2);
 
+		//Managing desconecction with SIM800L.
+		myModem.finish();
+
+		sleep(2);
 	}
 }
 
@@ -234,31 +241,17 @@ inline double to_degrees(double radians)
 	return radians*(180.0/M_PI);
 }
 
-void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem)
-{	
-	cout<<"|------------Measuring---------------------------|"<<endl;
-	int i=0,j=0;
-	char cadcs[100];
-	int signal[20];
-	double height[20];
-	int signal_sum=0,signal_average=0;
-	double height_sum=0,height_average=0;
-	for(i=0;i<20;i++)
-	{	
-		p=flight->getPosition();
-		height[i]=p.height;
-		signal[i]=myModem.getSignalQuality();
-		cout<<i<<"/20"<<endl;
-		usleep(500000);	
+void countdown(int seconds, bool led, Protoboard myProto)
+{
+	int halfsecond=500000;
+	for(int i=seconds;i>0;i--)
+	{
+		std::cout<<i<<" seconds"<<std::endl;
+		if(led==true)
+			myProto.MyLed.LedOn();
+		usleep(halfsecond);
+		if(led==true)
+			myProto.MyLed.LedOff();
+		usleep(halfsecond);
 	}
-	for(j=0;j<20;j++)
-	{	
-		height_sum+=height[j];
-		signal_sum+=signal[j];		
-	}
-	height_average=height_sum/20.0;
-	signal_average=signal_sum/20;
-	sprintf(cadcs,"%lf;%i\n",height_average,signal_average);
-	printf("%s",cadcs);
-	write(fd,cadcs,strlen(cadcs));
 }

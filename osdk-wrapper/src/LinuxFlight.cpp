@@ -430,6 +430,69 @@ int moveByPositionOffset(CoreAPI* api, Flight* flight, float32_t xOffsetDesired,
   return 1;
 }
 
+/*! Position Control (2). Function modified by Alvaro Zornoza
+!*/
+
+int moveByPositionOffset2(CoreAPI* api, Flight* flight, float32_t zOffsetDesired, float32_t yawDesired ,  int timeoutInMs, float yawThresholdInDeg, float posThresholdInCm)
+{
+  uint8_t flag = 0x91; //Position Control
+
+  // Get current poition
+  PositionData curPosition = api->getBroadcastData().pos;
+  PositionData originPosition = curPosition;
+  DJI::Vector3dData curLocalOffset; 
+  
+  DJI::EulerAngle curEuler = Flight::toEulerAngle(api->getBroadcastData().q);
+
+  //Convert position offset from first position to local coordinates
+  localOffsetFromGpsOffset(curLocalOffset, &curPosition, &originPosition);
+  
+  //See how much farther we have to go
+  float32_t zOffsetRemaining = zOffsetDesired - curLocalOffset.z;
+
+  //Conversions
+  double yawDesiredRad = DEG2RAD*yawDesired;
+  double yawThresholdInRad = DEG2RAD*yawThresholdInDeg;
+  float32_t posThresholdInM = posThresholdInCm/100;
+
+  int elapsedTime = 0;
+  int speedFactor = 2;
+  float xCmd, yCmd, zCmd;
+
+  /*! Calculate the inputs to send the position controller. We implement basic
+      receding setpoint position control and the setpoint is always 1 m away 
+      from the current position - until we get within a threshold of the goal.
+      From that point on, we send the remaining distance as the setpoint.
+  !*/ 
+  zCmd = curPosition.height + zOffsetDesired;
+
+
+  //! Main closed-loop receding setpoint position control
+  while(std::abs(zOffsetRemaining) > posThresholdInM || std::abs(curEuler.yaw - yawDesiredRad) > yawThresholdInRad)
+  {
+    // Check timeout
+    if (elapsedTime >= timeoutInMs)
+    {
+      break;
+    }
+    
+    //MovementControl API call
+    flight->setMovementControl(flag,0,0,zCmd, yawDesired);
+    usleep(20000);
+    elapsedTime += 20;
+
+    //Get current position in required coordinates and units 
+    curEuler = Flight::toEulerAngle(api->getBroadcastData().q);
+    curPosition = api->getBroadcastData().pos;
+    localOffsetFromGpsOffset(curLocalOffset, &curPosition, &originPosition);
+    
+    //See how much farther we have to go
+    zOffsetRemaining = zOffsetDesired - curLocalOffset.z;
+  }
+  return 1;
+}
+
+
 /*! Velocity Control. Allows you to set a body-frame velocity setpoint 
     of the form (x_dot, y_dot, z_dot, yaw_dot). 
     The aircraft will reach that velocity and this functio      n will return.

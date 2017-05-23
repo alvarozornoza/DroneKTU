@@ -84,6 +84,10 @@ int attitudeAltitudeControl(CoreAPI* api, Flight* flight, float32_t rollDesired,
 !*/
 int moveByPositionOffset(CoreAPI* api, Flight* flight, float32_t xOffsetDesired, float32_t yOffsetDesired, float32_t zOffsetDesired, float32_t yawDesired ,  int timeoutInMs = 10000, float yawThresholdInDeg = 1, float posThresholdInCm = 5);
 
+/*! Position Control (2). Function modified by Alvaro Zornoza
+!*/
+int moveByPositionOffset2(CoreAPI* api, Flight* flight, float32_t zOffsetDesired, float32_t yawDesired, int timeoutInMs = 10000, float yawThresholdInDeg = 1, float posThresholdInCm = 5);
+
 /*! Velocity Control. Allows you to set a body-frame velocity setpoint 
     of the form (x_dot, y_dot, z_dot, yaw_dot). 
     The aircraft will reach that velocity and this function will return.
