@@ -170,6 +170,8 @@ int main(int argc,char* argv[])
 		sprintf(intro,"\n|------------------------------------------------|\n|-DroneKTU. Copyright (C) 2017 Alvaro Zornoza----|\n|------------------------------------------------|\n\n");
 		write(fd,intro,strlen(intro));
 		printf("%s",intro);
+		
+		
 		//|-Time:%lf --------------------------------------|\n
 		
 		//If battery is not charged enough the program will not start and record it in the log.
@@ -208,6 +210,7 @@ int main(int argc,char* argv[])
 			cout<<"Waiting 10 seconds before measuring"<<endl;
 			countdown(10,false,myProto);
 			measure(api,flight,fd,position,myModem);
+			cout<<"Time:"<<serialDevice->getTimeStamp();
 		}
 		landing(api,flight);
 
