@@ -68,7 +68,7 @@
 #include "Modem.h"
 #include "Measurement.h"
 
-#define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD324/results/"
+#define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD325/results/"
 #define altitude 100
 #define interval 5
 #define battery_min_capacity 40
@@ -156,7 +156,6 @@ int main(int argc,char* argv[])
 			myProto.MyLed.LedBlink(6);
 			continue;
 		}
-	
 		//Main process.
 		char intro[1000];
 
@@ -184,7 +183,7 @@ int main(int argc,char* argv[])
 			continue;
 		}
 
-		sprintf(intro,"|-DroneKTU v2.0 experiment-----------------------|\n-Latitude:%lf \n-Longitude:%lf \n-Battery:%i \n|------------------------------------------------|\n\n",to_degrees(position.latitude),to_degrees(position.longitude),battery);
+		sprintf(intro,"|-DroneKTU v2.0 experiment-----------------------|\n-Latitude:%lf \n-Longitude:%lf \n|------------------------------------------------|\n\n",to_degrees(position.latitude),to_degrees(position.longitude));
 		write(fd,intro,strlen(intro));
 		printf("%s",intro);
 
@@ -217,8 +216,7 @@ int main(int argc,char* argv[])
 	
 		//Managing the closing of the file.
 		char end[1000];
-		battery=api->getBatteryCapacity();
-		sprintf(end,"\nExperiment runned sucessfully. Battery status: %i%\n",battery);
+		sprintf(end,"\nExperiment runned sucessfully. \n");
 		write(fd,end,strlen(end));
 		printf("%s",end);
 		close(fd);

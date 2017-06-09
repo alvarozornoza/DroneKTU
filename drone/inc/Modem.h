@@ -62,6 +62,7 @@ public:
 	int begin();
 	void finish();
 	int getSignalQuality();	
+	void getInfo(struct antenna *antennas, int len);
 };
 
 #endif /* INC_MODEM_H_ */

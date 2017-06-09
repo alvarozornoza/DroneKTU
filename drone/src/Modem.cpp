@@ -38,6 +38,17 @@
 #include "SerialInterface.h"
 #include "Modem.h"
 
+struct antenna_c
+{
+	char cellid[4];
+	char rxl[2];
+};
+struct antenna
+{
+	int cellid;
+	int rxl;
+} ; 
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -65,13 +76,87 @@ int Modem::begin()
 	if(setup)
 		SIM.serial_init();
 	return setup;
+	
 }
 
 void Modem::finish()
 {
 	SIM.close_serial();
 }
+void Modem::getInfo(struct antenna *antennas, int len)
+{	
+	
+	struct antenna_c antennas_c[len];
+	//struct antenna antennas[len];
 
+	char command[]="AT\r\n";
+	SIM.set_get_cmd(command);
+	char command2[]="AT+CENG=3\r\n";
+	SIM.set_get_cmd(command2);
+	char command3[]="AT+CENG?\r\n";
+	SIM.set_get_cmd(command3);
+	int rv=strlen(SIM.respuesta);
+/*
+	//std::cout<<rv<<std::endl;
+	//char aux[]="+CENG: 0";
+	//char *position;
+	//position=strstr(SIM.respuesta,aux);
+	//int pos=atoi(position);
+	//printf("%d",&pos);
+
+	for (int j=0; j<rv-4; j++)
+		printf("%c",SIM.respuesta[j]);*/
+	
+	for (int i=0; i<len; i++)
+	{
+		int cont=0;
+		for (int j=0; j<rv; j++)
+		{	
+			if(SIM.respuesta[j]==',')
+			{			
+				cont++;
+				if(cont==(6*i+5))
+				{	
+					for(int k=0;k<4;k++)
+						antennas_c[i].cellid[k]=SIM.respuesta[j+k+1];
+					for(int z=0;z<2;z++)
+						antennas_c[i].rxl[z]=SIM.respuesta[j+z+9];
+				}
+			}
+		}
+	}
+
+	for (int j=0; j<len; j++)
+	{
+		char aux[2];
+		for(int z=0;z<2;z++)
+			aux[z]=antennas_c[j].rxl[z];
+		antennas[j].rxl=(-113+atoi(aux));
+		//printf("%d",antennas[j].rxl);
+		//printf("\n");
+	}	
+	for (int j=0; j<len; j++)
+	{	
+		char aux[4];
+		for(int z=0;z<4;z++)
+			aux[z]=antennas_c[j].cellid[z];
+		antennas[j].cellid=(int)strtol(aux,NULL,16);
+		//printf("%d",antennas[j].cellid);
+		//printf("\n");
+	}
+	/*for (int j=0; j<7; j++)
+	{
+		for(int k=0;k<4;k++)
+			printf("%c",(antennas_c[j].cellid[k]));
+		printf("\n");
+		for(int z=0;z<2;z++)
+			printf("%c",antennas_c[j].rxl[z]);
+		printf("\n");
+	}*/	
+			
+		
+	
+}
 int Modem::getSignalQuality()
 {
 	/*response 

@@ -36,56 +36,107 @@
 
 #include "Measurement.h"
 
-#define numberofvalues 20
-
 using namespace std;
+
+struct antenna
+{
+	int cellid;
+	int rxl;
+} ; 
 
 void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem)
 {	
+	
 	cout<<"\nMeasuring"<<endl;
 	char cadcs[100];
-	int signal[numberofvalues+1];
-	double height[numberofvalues+1];
-	double height_average=0, signal_average=0, height_sd=0, signal_sd=0;
-	getData(height,signal,flight,p,myModem);
-	average(height,signal,&height_average,&signal_average);
-	standardDeviation(height,signal,height_average,signal_average,&height_sd,&signal_sd);
-	sprintf(cadcs,"%lf;%lf;%lf;%lf\n",height_average,height_sd,signal_average,signal_sd);
-	printf("\n%s\n\n",cadcs);
+	char santennas[7][100];
+	//int signal[numberofvalues+1];
+	double height;
+	int cellid[len];
+	int rxl[numberofvalues][len];
+	double rxl_avg[]={0,0,0,0,0,0,0};
+	double rxl_sd[]={0,0,0,0,0,0,0};
+	//double height_average=0, signal_average=0, height_sd=0, signal_sd=0;
+	getData(height,rxl,cellid,flight,p,myModem);
+	average(rxl,rxl_avg);
+	standardDeviation(rxl,rxl_avg,rxl_sd);
+	sprintf(cadcs,"Altitude %lf\n",height);
+	printf("\n%s",cadcs);
 	write(fd,cadcs,strlen(cadcs));
-}
-void getData(double height[], int signal[], Flight* flight, PositionData p, Modem myModem)
-{
-	for(int i=0;i<numberofvalues+1;i++)
-	{	
-			p=flight->getPosition();
-			height[i]=p.height;
-			signal[i]=myModem.getSignalQuality();
-			cout<<i<<"/"<<numberofvalues<<endl;
-			usleep(500000);	
+	for(int i=0;i<len;i++)
+	{
+		sprintf(santennas[i],"%d;%lf;%lf\n",cellid[i],rxl_avg[i],rxl_sd[i]);
+		printf("\n%s\n",santennas[i]);
+		write(fd,santennas[i],strlen(santennas[i]));
 	}
 }
 
-void average(double height[], int signal[], double *height_average, double *signal_average)
+void getData(double height,int rxl[numberofvalues][len], int cellid[], Flight* flight, PositionData p, Modem myModem)
+{	
+	height=flight->getPosition().height;
+	struct antenna antennas[len];
+	for(int i=0;i<numberofvalues;i++)
+	{	
+		myModem.getInfo(antennas,len);	
+		for(int j=0;j<len;j++)
+		{
+			rxl[i][j]=antennas[j].rxl;
+			if(i==0)
+			 	cellid[j]=antennas[j].cellid;
+		}
+		cout<<i<<"/"<<numberofvalues<<endl;
+		usleep(500000);
+	}	
+	for(int i=0;i<numberofvalues;i++)
+	{
+		for(int j=0;j<len;j++)
+			printf("%d",rxl[i][j]);
+		printf("\n");
+	}
+		
+}
+void average(int rxl[numberofvalues][len], double rxl_avg[])
 {
-	double height_sum=0,signal_sum=0;
+
+	double rxl_sum[]={0,0,0,0,0,0,0};
+	for(int j=0;j<len;j++)	
+	{	
+		printf("\n");
+		for(int i=0;i<numberofvalues;i++)
+		{
+			rxl_sum[j]+=rxl[i][j];
+			printf("%lf\n",rxl_sum[j]);
+		}
+	}	
+	for(int j=0;j<len;j++)
+	{
+		rxl_avg[j]=rxl_sum[j]/numberofvalues;
+		
+	}
+
+
+	/*double height_sum=0,signal_sum=0;
 	for(int j=1;j<numberofvalues+1;j++)
 	{	
 		height_sum+=height[j];
 		signal_sum+=signal[j];		
 	}
 	*height_average=height_sum/numberofvalues;
-	*signal_average=signal_sum/numberofvalues;
+	*signal_average=signal_sum/numberofvalues;*/
 }
 
-void standardDeviation(double height[], int signal[], double height_average, double signal_average, double *height_sd, double *signal_sd)
+void standardDeviation(int rxl[numberofvalues][len], double rxl_avg[], double rxl_sd[])
 {
-	double height_aux=0,signal_aux=0;	
-	for(int i=1;i<numberofvalues+1;i++)
+	double rxl_aux[]={0,0,0,0,0,0,0};
+	for(int j=0;j<len;j++)
 	{
-		height_aux+=pow(height[i]-height_average,2);
-		signal_aux+=pow(signal[i]-signal_average,2);
+		for(int i=0;i<numberofvalues;i++)
+		{		
+			rxl_aux[j]+=pow(rxl[i][j]-rxl_avg[j],2);
+		}
+	}	
+	for(int j=0;j<len;j++)
+	{
+		rxl_sd[j]=sqrt(rxl_aux[j]/numberofvalues);
 	}
-	*height_sd=sqrt(height_aux/numberofvalues);
-	*signal_sd=sqrt(signal_aux/numberofvalues);
 }

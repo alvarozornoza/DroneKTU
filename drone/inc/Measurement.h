@@ -67,7 +67,10 @@
 #include "Protoboard.h"
 #include "Modem.h"
 
+#define numberofvalues 20
+#define len 7
+
 void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem);
-void getData(double height[], int signal[], Flight* flight, PositionData p, Modem myModem);
-void average(double height[], int signal[], double *height_average, double *signal_average);
-void standardDeviation(double height[], int signal[], double height_average, double signal_average, double *height_sd, double *signal_sd);
+void getData(double height,int rxl[numberofvalues][len], int cellid[], Flight* flight, PositionData p, Modem myModem);
+void average(int rxl[numberofvalues][len], double rxl_avg[]);
+void standardDeviation(int rxl[numberofvalues][len], double rxl_avg[], double rxl_sd[]);

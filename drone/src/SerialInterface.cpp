@@ -95,7 +95,7 @@ int SerialInterface::serial_init()
 int SerialInterface::read_port(int ret)
 {
 	int rv = 0;
-	char buf[64];
+	char buf[500];
 	respuesta=buf;
 	if(ret)
 		rv = read(fd, &buf, sizeof(buf));
@@ -121,7 +121,7 @@ int SerialInterface::write_port(char * cmd, int len)
 void SerialInterface::set_get_cmd(char * cmd_str)
 {
 	int ret;
-	char cmd[64];
+	char cmd[500];
 	set_cmd(cmd, cmd_str);
 	ret = write_port(cmd, strlen(cmd));
 	usleep(100000);
