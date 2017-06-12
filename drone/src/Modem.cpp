@@ -141,11 +141,11 @@ void Modem::getInfo(struct antenna *antennas, int len)
 		for(int z=0;z<4;z++)
 		{
 			aux[z]=antennas_c[j].cellid[z];
-			printf("%c",antennas_c[j].cellid[z]);
+			//printf("%c",antennas_c[j].cellid[z]);
 		}
 		aux[4]='\0';	
 		antennas[j].cellid=strtol(aux,NULL,16);
-		printf("%li\n",antennas[j].cellid);	
+		//printf("%li\n",antennas[j].cellid);	
 		//printf("%d",antennas[j].cellid);
 		//printf("\n");
 	}

@@ -209,7 +209,6 @@ int main(int argc,char* argv[])
 			cout<<"Waiting 10 seconds before measuring"<<endl;
 			countdown(10,false,myProto);
 			measure(api,flight,fd,position,myModem);
-			cout<<"Time:"<<serialDevice->getTimeStamp();
 		}
 		landing(api,flight);
 
