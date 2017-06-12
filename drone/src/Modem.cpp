@@ -40,12 +40,12 @@
 
 struct antenna_c
 {
-	char cellid[4];
-	char rxl[2];
+	char cellid[5];
+	char rxl[3];
 };
 struct antenna
 {
-	int cellid;
+	long cellid;
 	int rxl;
 } ; 
 
@@ -139,8 +139,13 @@ void Modem::getInfo(struct antenna *antennas, int len)
 	{	
 		char aux[4];
 		for(int z=0;z<4;z++)
+		{
 			aux[z]=antennas_c[j].cellid[z];
-		antennas[j].cellid=(int)strtol(aux,NULL,16);
+			printf("%c",antennas_c[j].cellid[z]);
+		}
+		aux[4]='\0';	
+		antennas[j].cellid=strtol(aux,NULL,16);
+		printf("%li\n",antennas[j].cellid);	
 		//printf("%d",antennas[j].cellid);
 		//printf("\n");
 	}

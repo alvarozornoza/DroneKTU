@@ -69,7 +69,7 @@
 #include "Measurement.h"
 
 #define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD325/results/"
-#define altitude 100
+#define altitude 10
 #define interval 5
 #define battery_min_capacity 40
 

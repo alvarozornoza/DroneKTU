@@ -40,7 +40,7 @@ using namespace std;
 
 struct antenna
 {
-	int cellid;
+	long cellid;
 	int rxl;
 } ; 
 
@@ -50,7 +50,7 @@ void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem
 	char cadcs[100];
 	char santennas[7][100];
 	double height=0;
-	int cellid[len];
+	long cellid[len];
 	int rxl[numberofvalues][len];
 	double rxl_avg[]={0,0,0,0,0,0,0};
 	double rxl_sd[]={0,0,0,0,0,0,0};
@@ -64,15 +64,15 @@ void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem
 	write(fd,cadcs,strlen(cadcs));
 	for(int i=0;i<len;i++)
 	{
-		sprintf(santennas[i],"%d;%lf;%lf\n",cellid[i],rxl_avg[i],rxl_sd[i]);
+		sprintf(santennas[i],"%li;%lf;%lf\n",cellid[i],rxl_avg[i],rxl_sd[i]);
 		printf("\n%s\n",santennas[i]);
 		write(fd,santennas[i],strlen(santennas[i]));
 	}
 }
 
-void getData(double *height,int rxl[numberofvalues][len], int cellid[], Flight* flight, PositionData p, Modem myModem)
+void getData(double *height,int rxl[numberofvalues][len], long cellid[], Flight* flight, PositionData p, Modem myModem)
 {	
-	height=flight->getPosition().height;
+	*height=flight->getPosition().height;
 	struct antenna antennas[len];
 	for(int i=0;i<numberofvalues;i++)
 	{	
@@ -86,12 +86,12 @@ void getData(double *height,int rxl[numberofvalues][len], int cellid[], Flight* 
 		cout<<i<<"/"<<numberofvalues<<endl;
 		usleep(200000);
 	}	
-	for(int i=0;i<numberofvalues;i++)
-	{
-		for(int j=0;j<len;j++)
-			printf("%d",rxl[i][j]);
-		printf("\n");
-	}
+	//for(int i=0;i<numberofvalues;i++)
+	//{
+		//for(int j=0;j<len;j++)
+		//	printf("%d",rxl[i][j]);
+		//printf("\n");
+	//}
 		
 }
 void average(int rxl[numberofvalues][len], double rxl_avg[])
@@ -104,7 +104,7 @@ void average(int rxl[numberofvalues][len], double rxl_avg[])
 		for(int i=0;i<numberofvalues;i++)
 		{
 			rxl_sum[j]+=rxl[i][j];
-			printf("%lf\n",rxl_sum[j]);
+			//printf("%lf\n",rxl_sum[j]);
 		}
 	}	
 	for(int j=0;j<len;j++)

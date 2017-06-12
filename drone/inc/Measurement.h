@@ -71,6 +71,6 @@
 #define len 7
 
 void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem);
-void getData(double *height,int rxl[numberofvalues][len], int cellid[], Flight* flight, PositionData p, Modem myModem);
+void getData(double *height,int rxl[numberofvalues][len], long cellid[], Flight* flight, PositionData p, Modem myModem);
 void average(int rxl[numberofvalues][len], double rxl_avg[]);
 void standardDeviation(int rxl[numberofvalues][len], double rxl_avg[], double rxl_sd[]);
