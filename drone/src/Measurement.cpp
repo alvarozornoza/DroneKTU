@@ -47,17 +47,16 @@ struct antenna
 void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem)
 {	
 	
-	cout<<"\nMeasuring"<<endl;
 	char cadcs[100];
 	char santennas[7][100];
-	//int signal[numberofvalues+1];
-	double height;
+	double height=0;
 	int cellid[len];
 	int rxl[numberofvalues][len];
 	double rxl_avg[]={0,0,0,0,0,0,0};
 	double rxl_sd[]={0,0,0,0,0,0,0};
-	//double height_average=0, signal_average=0, height_sd=0, signal_sd=0;
-	getData(height,rxl,cellid,flight,p,myModem);
+
+	cout<<"\nMeasuring"<<endl;
+	getData(&height,rxl,cellid,flight,p,myModem);
 	average(rxl,rxl_avg);
 	standardDeviation(rxl,rxl_avg,rxl_sd);
 	sprintf(cadcs,"Altitude %lf\n",height);
@@ -71,7 +70,7 @@ void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem
 	}
 }
 
-void getData(double height,int rxl[numberofvalues][len], int cellid[], Flight* flight, PositionData p, Modem myModem)
+void getData(double *height,int rxl[numberofvalues][len], int cellid[], Flight* flight, PositionData p, Modem myModem)
 {	
 	height=flight->getPosition().height;
 	struct antenna antennas[len];
@@ -85,7 +84,7 @@ void getData(double height,int rxl[numberofvalues][len], int cellid[], Flight* f
 			 	cellid[j]=antennas[j].cellid;
 		}
 		cout<<i<<"/"<<numberofvalues<<endl;
-		usleep(500000);
+		usleep(200000);
 	}	
 	for(int i=0;i<numberofvalues;i++)
 	{
