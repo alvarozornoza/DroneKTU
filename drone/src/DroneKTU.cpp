@@ -198,19 +198,43 @@ int main(int argc,char* argv[])
 		angle=flight->getEulerAngle();
 
 		//Calculating the number of steps based on the altitude and the interval desired.
-		int steps=altitude/interval;
-		
-		//Main loop. Ascending and measeuring in each step.
-		for(int m=0;m<steps;m++)
+		//int steps=altitude/interval;
+
+		//Ascending to 20 meters
+		std::cout<<"Ascending to 20 meters\n"<< std::endl;
+		position=flight->getPosition();
+		moveByPositionOffset2(api,flight,((20-position.height)*1.033),to_degrees(angle.yaw));
+			
+		//Main loop. Manouvering and measeuring in each step.
+		for(int i=0;i<2;i++)
 		{
-			std::cout<<"Ascending to "<<5*(m+1)<<" meters\n"<< std::endl;
-			position=flight->getPosition();
-			moveByPositionOffset2(api, flight,(((5*(m+1))-position.height)*1.033),to_degrees(angle.yaw));
-			cout<<"Waiting 10 seconds before measuring"<<endl;
-			countdown(10,false,myProto);
-			measure(api,flight,fd,position,myModem);
+			for(int j=0;j<2;j++)
+			{
+				angle=flight->getEulerAngle();
+				if(i==0||i==2||i==4||i==6)
+					moveByPositionOffset(api,flight,12,0,0,to_degrees(angle.yaw));
+				else	
+					moveByPositionOffset(api,flight,-12,0,0,to_degrees(angle.yaw));
+				
+			}
+			if(i!=6)
+				moveByPositionOffset(api,flight,0,17,0,to_degrees(angle.yaw));
 		}
-		landing(api,flight);
+
+
+
+		//for(int m=0;m<steps;m++)
+		//{
+		//	std::cout<<"Ascending to "<<5*(m+1)<<" meters\n"<< std::endl;
+		//	position=flight->getPosition();
+		//	moveByPositionOffset2(api, flight,(((5*(m+1))-position.height)*1.033),to_degrees(angle.yaw));
+		//	cout<<"Waiting 10 seconds before measuring"<<endl;
+		//	countdown(10,false,myProto);
+		//	measure(api,flight,fd,position,myModem);
+		//}
+
+		goHome(flight);
+		//landing(api,flight);
 
 	
 		//Managing the closing of the file.
