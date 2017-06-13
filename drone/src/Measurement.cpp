@@ -46,7 +46,6 @@ struct antenna
 
 void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem)
 {	
-	
 	char cadcs[100];
 	char santennas[7][100];
 	double height=0;
@@ -69,7 +68,6 @@ void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem
 		write(fd,santennas[i],strlen(santennas[i]));
 	}
 }
-
 void getData(double *height,int rxl[numberofvalues][len], long cellid[], Flight* flight, PositionData p, Modem myModem)
 {	
 	*height=flight->getPosition().height;

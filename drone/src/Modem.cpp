@@ -73,10 +73,30 @@ int Modem::begin()
 {
 	int setup;
 	setup=SIM.open_serial(DEFAULT_PI_SERIAL_PORT);
+
+	//char cmd1[20],cmd2[20],cmd3[20],cmd4[20],cmd5[20];
+	//set_cmd(cmd, cmd_str);
+	//ret = write_port(cmd, strlen(cmd));
+	//usleep(100000);
+	
+	char command[]="AT\r\n";
+	SIM.write_port(command,strlen(command));
+	usleep(100000);
+	char command5[]="AT+CENG=3\r\n";
+	SIM.write_port(command5,strlen(command5));
+	usleep(100000);
+	char command2[]="AT+COPS=2\r\n";
+	SIM.write_port(command2,strlen(command2));
+	usleep(2000000);
+	char command3[]="AT+CLTS=1\r\n";
+	SIM.write_port(command3,strlen(command3));
+	usleep(100000);
+	char command4[]="AT+COPS=0\r\n";
+	SIM.write_port(command4,strlen(command4));
+	usleep(3000000);
 	if(setup)
 		SIM.serial_init();
 	return setup;
-	
 }
 
 void Modem::finish()
@@ -88,11 +108,6 @@ void Modem::getInfo(struct antenna *antennas, int len)
 	
 	struct antenna_c antennas_c[len];
 	//struct antenna antennas[len];
-
-	char command[]="AT\r\n";
-	SIM.set_get_cmd(command);
-	char command2[]="AT+CENG=3\r\n";
-	SIM.set_get_cmd(command2);
 	char command3[]="AT+CENG?\r\n";
 	SIM.set_get_cmd(command3);
 	int rv=strlen(SIM.respuesta);
@@ -162,6 +177,40 @@ void Modem::getInfo(struct antenna *antennas, int len)
 		
 	
 }
+void Modem::getTime(char* time)
+{
+
+	char command5[]="AT+CCLK?\r\n";
+	SIM.set_get_cmd(command5);
+	int rv=strlen(SIM.respuesta);
+	int i,j;
+	char aux[18];
+	char *pch;
+	pch=strstr(SIM.respuesta,"+CCLK: ");
+	int pos=pch-SIM.respuesta;
+	//for(int x=0;x<rv;x++)
+	//{	
+	//	printf("%c",SIM.respuesta[x]);
+	//}
+	
+	for(j=0;j<17;j++)
+	{
+		aux[j]=SIM.respuesta[pos+j+8];
+	}
+	for(j=0;j<17;j++)
+	{
+		if(aux[j]=='/')	
+			time[j]='-';
+		else if(aux[j]==',')
+			time[j]='_';
+		else if(aux[j]==':')
+			time[j]='.';
+		else
+			time[j]=aux[j];
+	}
+	time[17]='\0';
+}
+
 int Modem::getSignalQuality()
 {
 	/*response 

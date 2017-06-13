@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <termios.h>
 #include <iostream>
+#include <time.h>
 
 #include "SerialInterface.h"
 
@@ -63,6 +64,7 @@ public:
 	void finish();
 	int getSignalQuality();	
 	void getInfo(struct antenna *antennas, int len);
+	void getTime(char* time);
 };
 
 #endif /* INC_MODEM_H_ */

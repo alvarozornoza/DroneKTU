@@ -69,9 +69,9 @@
 #include "Measurement.h"
 
 #define DEFAULT_PENDRIVE "/media/ubuntu/4CE4-CD325/results/"
-#define altitude 10
+#define altitude 100
 #define interval 5
-#define battery_min_capacity 40
+#define battery_min_capacity 0
 
 using namespace std;
 using namespace DJI;
@@ -82,16 +82,20 @@ void countdown(int seconds, bool led, Protoboard myProto);
 
 int main(int argc,char* argv[])
 {
-	//Managing the protoboard.
-   	Protoboard myProto; 
-	myProto.MyLed.LedOn();
+	
 	std::cout << "|---------------------------------------------------------------------------|"<< std::endl;
 	std::cout << "|------------------DroneKTU. Copyright (C) 2017 Alvaro Zornoza--------------|"<< std::endl;
 	std::cout << "|---------------------------------------------------------------------------|"<< std::endl;
 	std::cout<<""<<std::endl<<std::endl;
 
+	//Managing the modem.
+	Modem myModem;
+	//Managing the protoboard.
+   	Protoboard myProto; 
+	myProto.MyLed.LedOn();
+
 	//Starting the process.
-	while(1) // Although is a bad programming practice, in the only way since I do not have a screen during the flight.
+	while(1) // Although it is a bad programming practice, it is the only way since I do not have a screen during the flight.
 	{
 		std::cout << "|---------------------------------------------------------------------------|" << std::endl;
 		std::cout << "|-Please press the button to run the process or Ctrl+C to close the program-|" << std::endl;
@@ -115,17 +119,14 @@ int main(int argc,char* argv[])
 		BatteryData battery;
 		EulerAngle angle;
 
-		//Managing the modem.
-		Modem myModem;
-
 		//Setup.
-		int setupModem = myModem.begin();
-		if (setupModem = 0)
-		{
-			std::cout << "ERROR: It was not possible to connect with the Modem SIM800L. This program will exit now. \n"; //The led blinks twice to show the error.
-			myProto.MyLed.LedBlink(2);
-			continue;
-		}
+		//int setupModem = myModem.begin();
+		//if (setupModem = 0)
+		//{
+		//	std::cout << "ERROR: It was not possible to connect with the Modem SIM800L. This program will exit now. \n"; //The led blinks twice to show the error.
+		//	myProto.MyLed.LedBlink(2);
+		//	continue;
+		//}
 
 		int setupStatus = setup(serialDevice, api, &read);
 		if (setupStatus == -1)
@@ -140,15 +141,19 @@ int main(int argc,char* argv[])
 	  	usleep(500000);
 
 		//Managing local time for file name.
+		char time[18];
+		myModem.getTime(time);
+
+		/*//Managing local time for file name.
 		time_t tiempo = time(0);
 		struct tm *tlocal = localtime(&tiempo);
 		char output[128];
-		strftime(output, 128, "%d-%m-%y_%H.%M.%S", tlocal);
+		strftime(output, 128, "%d-%m-%y_%H.%M.%S", tlocal);*/
 	
 		//Managing the opening of the file.
 		int fd;
 		char buf[100];
-		sprintf(buf,"%s%s",DEFAULT_PENDRIVE,output);
+		sprintf(buf,"%s%s",DEFAULT_PENDRIVE,time);
 		fd=open(buf,O_WRONLY|O_CREAT|O_TRUNC,0666);
 		if(fd<0)
 		{
@@ -183,7 +188,7 @@ int main(int argc,char* argv[])
 			continue;
 		}
 
-		sprintf(intro,"|-DroneKTU v2.0 experiment-----------------------|\n-Latitude:%lf \n-Longitude:%lf \n|------------------------------------------------|\n\n",to_degrees(position.latitude),to_degrees(position.longitude));
+		sprintf(intro,"|-DroneKTU v2.0 experiment-----------------------|\n-Latitude:%lf \n-Longitude:%lf \n-Date and time: %s \n|------------------------------------------------|\n\n",to_degrees(position.latitude),to_degrees(position.longitude),time);
 		write(fd,intro,strlen(intro));
 		printf("%s",intro);
 
@@ -198,40 +203,40 @@ int main(int argc,char* argv[])
 		angle=flight->getEulerAngle();
 
 		//Calculating the number of steps based on the altitude and the interval desired.
-		//int steps=altitude/interval;
+		int steps=altitude/interval;
 
-		//Ascending to 20 meters
+		/*//Ascending to 20 meters
 		std::cout<<"Ascending to 20 meters\n"<< std::endl;
 		position=flight->getPosition();
 		moveByPositionOffset2(api,flight,((20-position.height)*1.033),to_degrees(angle.yaw));
 			
 		//Main loop. Manouvering and measeuring in each step.
-		for(int i=0;i<2;i++)
+		for(int i=0;i<7;i++)
 		{
-			for(int j=0;j<2;j++)
+			for(int j=0;j<5;j++)
 			{
 				angle=flight->getEulerAngle();
 				if(i==0||i==2||i==4||i==6)
-					moveByPositionOffset(api,flight,12,0,0,to_degrees(angle.yaw));
-				else	
 					moveByPositionOffset(api,flight,-12,0,0,to_degrees(angle.yaw));
+				else	
+					moveByPositionOffset(api,flight,12,0,0,to_degrees(angle.yaw));
 				
 			}
 			if(i!=6)
 				moveByPositionOffset(api,flight,0,17,0,to_degrees(angle.yaw));
+		}*/
+
+
+
+		for(int m=0;m<steps;m++)
+		{
+			std::cout<<"Ascending to "<<5*(m+1)<<" meters\n"<< std::endl;
+			position=flight->getPosition();
+			moveByPositionOffset2(api, flight,(((5*(m+1))-position.height)*1.033),to_degrees(angle.yaw));
+			cout<<"Waiting 10 seconds before measuring"<<endl;
+			countdown(10,false,myProto);
+			measure(api,flight,fd,position,myModem);
 		}
-
-
-
-		//for(int m=0;m<steps;m++)
-		//{
-		//	std::cout<<"Ascending to "<<5*(m+1)<<" meters\n"<< std::endl;
-		//	position=flight->getPosition();
-		//	moveByPositionOffset2(api, flight,(((5*(m+1))-position.height)*1.033),to_degrees(angle.yaw));
-		//	cout<<"Waiting 10 seconds before measuring"<<endl;
-		//	countdown(10,false,myProto);
-		//	measure(api,flight,fd,position,myModem);
-		//}
 
 		goHome(flight);
 		//landing(api,flight);
