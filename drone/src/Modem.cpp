@@ -47,7 +47,7 @@ struct antenna
 {
 	long cellid;
 	int rxl;
-} ; 
+}; 
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -57,12 +57,10 @@ using namespace std;
 
 Modem::Modem()
 {	
-	begin();
 }
 
 Modem::~Modem()
 {
-	//SIM.close_serial();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -73,11 +71,6 @@ int Modem::begin()
 {
 	int setup;
 	setup=SIM.open_serial(DEFAULT_PI_SERIAL_PORT);
-
-	//char cmd1[20],cmd2[20],cmd3[20],cmd4[20],cmd5[20];
-	//set_cmd(cmd, cmd_str);
-	//ret = write_port(cmd, strlen(cmd));
-	//usleep(100000);
 	
 	char command[]="AT\r\n";
 	SIM.write_port(command,strlen(command));
@@ -94,6 +87,7 @@ int Modem::begin()
 	char command4[]="AT+COPS=0\r\n";
 	SIM.write_port(command4,strlen(command4));
 	usleep(3000000);
+
 	if(setup)
 		SIM.serial_init();
 	return setup;
@@ -103,24 +97,14 @@ void Modem::finish()
 {
 	SIM.close_serial();
 }
-void Modem::getInfo(struct antenna *antennas, int len)
+
+void Modem::getInfo1(struct antenna *antennas, int len)
 {	
-	
+	// With AT+CENG it is possible to get RSSI from 7 antenna at the same antenna. The first one (CENG 0) is always the one that it is connected with and the most powerful.s
 	struct antenna_c antennas_c[len];
-	//struct antenna antennas[len];
 	char command3[]="AT+CENG?\r\n";
 	SIM.set_get_cmd(command3);
 	int rv=strlen(SIM.respuesta);
-/*
-	//std::cout<<rv<<std::endl;
-	//char aux[]="+CENG: 0";
-	//char *position;
-	//position=strstr(SIM.respuesta,aux);
-	//int pos=atoi(position);
-	//printf("%d",&pos);
-
-	for (int j=0; j<rv-4; j++)
-		printf("%c",SIM.respuesta[j]);*/
 	
 	for (int i=0; i<len; i++)
 	{
@@ -140,15 +124,12 @@ void Modem::getInfo(struct antenna *antennas, int len)
 			}
 		}
 	}
-
 	for (int j=0; j<len; j++)
 	{
 		char aux[2];
 		for(int z=0;z<2;z++)
 			aux[z]=antennas_c[j].rxl[z];
 		antennas[j].rxl=(-113+atoi(aux));
-		//printf("%d",antennas[j].rxl);
-		//printf("\n");
 	}	
 	for (int j=0; j<len; j++)
 	{	
@@ -156,43 +137,27 @@ void Modem::getInfo(struct antenna *antennas, int len)
 		for(int z=0;z<4;z++)
 		{
 			aux[z]=antennas_c[j].cellid[z];
-			//printf("%c",antennas_c[j].cellid[z]);
 		}
 		aux[4]='\0';	
 		antennas[j].cellid=strtol(aux,NULL,16);
-		//printf("%li\n",antennas[j].cellid);	
-		//printf("%d",antennas[j].cellid);
-		//printf("\n");
-	}
-	/*for (int j=0; j<7; j++)
-	{
-		for(int k=0;k<4;k++)
-			printf("%c",(antennas_c[j].cellid[k]));
-		printf("\n");
-		for(int z=0;z<2;z++)
-			printf("%c",antennas_c[j].rxl[z]);
-		printf("\n");
-	}*/	
-			
-		
+	}		
 	
 }
+
 void Modem::getTime(char* time)
 {
-
+	
 	char command5[]="AT+CCLK?\r\n";
 	SIM.set_get_cmd(command5);
 	int rv=strlen(SIM.respuesta);
+	
 	int i,j;
 	char aux[18];
 	char *pch;
+
 	pch=strstr(SIM.respuesta,"+CCLK: ");
 	int pos=pch-SIM.respuesta;
-	//for(int x=0;x<rv;x++)
-	//{	
-	//	printf("%c",SIM.respuesta[x]);
-	//}
-	
+
 	for(j=0;j<17;j++)
 	{
 		aux[j]=SIM.respuesta[pos+j+8];

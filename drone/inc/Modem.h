@@ -63,7 +63,7 @@ public:
 	int begin();
 	void finish();
 	int getSignalQuality();	
-	void getInfo(struct antenna *antennas, int len);
+	void getInfo1(struct antenna *antennas, int len);
 	void getTime(char* time);
 };
 

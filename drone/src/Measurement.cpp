@@ -44,7 +44,7 @@ struct antenna
 	int rxl;
 } ; 
 
-void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem)
+void measure1(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem)
 {	
 	char cadcs[100];
 	char santennas[7][100];
@@ -68,13 +68,33 @@ void measure(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem
 		write(fd,santennas[i],strlen(santennas[i]));
 	}
 }
+
+void measure2(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myModem, int i, int j)
+{	
+	
+	char cadcs[100];
+	char santennas[7][100];
+	double latitude=0,longitude=0;
+	int rxl[numberofvalues];
+	double rxl_avg=0;
+	double rxl_sd=0;
+
+	cout<<"\nMeasuring"<<endl;
+	getData(&latitude,&longitude,rxl,flight,p,myModem);
+	average(rxl,&rxl_avg);
+	standardDeviation(rxl,rxl_avg,&rxl_sd);
+	sprintf(cadcs,"Position: %i/%i \nLatitude: %lf\nLongitude: %lf\nRSSI(avg): %lf\nRSSI(sd): %lf\n",j,i,latitude,longitude,rxl_avg,rxl_sd);
+	printf("\n%s",cadcs);
+	write(fd,cadcs,strlen(cadcs));
+}
+
 void getData(double *height,int rxl[numberofvalues][len], long cellid[], Flight* flight, PositionData p, Modem myModem)
 {	
 	*height=flight->getPosition().height;
 	struct antenna antennas[len];
 	for(int i=0;i<numberofvalues;i++)
 	{	
-		myModem.getInfo(antennas,len);	
+		myModem.getInfo1(antennas,len);	
 		for(int j=0;j<len;j++)
 		{
 			rxl[i][j]=antennas[j].rxl;
@@ -84,14 +104,13 @@ void getData(double *height,int rxl[numberofvalues][len], long cellid[], Flight*
 		cout<<i<<"/"<<numberofvalues<<endl;
 		usleep(200000);
 	}	
-	//for(int i=0;i<numberofvalues;i++)
-	//{
-		//for(int j=0;j<len;j++)
-		//	printf("%d",rxl[i][j]);
-		//printf("\n");
-	//}
-		
 }
+void getData(double *latitude,double *longitude,int rxl[numberofvalues], Flight* flight, PositionData p, Modem myModem)
+{
+
+}
+
+
 void average(int rxl[numberofvalues][len], double rxl_avg[])
 {
 
@@ -110,17 +129,12 @@ void average(int rxl[numberofvalues][len], double rxl_avg[])
 		rxl_avg[j]=rxl_sum[j]/numberofvalues;
 		
 	}
-
-
-	/*double height_sum=0,signal_sum=0;
-	for(int j=1;j<numberofvalues+1;j++)
-	{	
-		height_sum+=height[j];
-		signal_sum+=signal[j];		
-	}
-	*height_average=height_sum/numberofvalues;
-	*signal_average=signal_sum/numberofvalues;*/
 }
+
+void average(int rxl[numberofvalues], double *rxl_avg)
+{
+}
+
 
 void standardDeviation(int rxl[numberofvalues][len], double rxl_avg[], double rxl_sd[])
 {
@@ -136,4 +150,8 @@ void standardDeviation(int rxl[numberofvalues][len], double rxl_avg[], double rx
 	{
 		rxl_sd[j]=sqrt(rxl_aux[j]/numberofvalues);
 	}
+}
+
+void standardDeviation(int rxl[numberofvalues], double rxl_avg, double *rxl_sd)
+{
 }
