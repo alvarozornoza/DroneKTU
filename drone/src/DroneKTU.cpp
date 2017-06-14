@@ -119,34 +119,10 @@ int main(int argc,char* argv[])
 		std::cout << "|-Please press the button to run the process or Ctrl+C to close the program-|" << std::endl;
 		std::cout << "|---------------------------------------------------------------------------|" << std::endl;
 		
-		int previous_state=0, state=0, aux=0, mode;
-		while(1)
+		while(!(myProto.MyButton.ButtonStatus()))
 		{
-			state=myProto.MyButton.ButtonStatus();
-			if(state==0 && previous_state==1)
-			{
-				if(aux>=4 && aux<10)
-				{
-					mode=1;
-					std::cout << "\nMode 1 chosen\n";
-					break;
-				}
-				else if(aux>10)
-				{
-					mode=2;
-					std::cout << "\nMode 2 chosen\n";
-					break;
-				}
-				else
-					continue;
-			}			
-			else if(state==1 && previous_state==1)
-				aux++;
-			else
-				continue;
 			usleep(500000);
 		}
-
 	
 		//Setup.
 		int setupModem = myModem.begin();
@@ -156,7 +132,7 @@ int main(int argc,char* argv[])
 			myProto.MyLed.LedBlink(2);
 			continue;
 		}
-
+		std::cout << "PRUEBA\n"; //The led blinks four times to show the error.
 		int setupStatus = setup(serialDevice, api, &read);
 		if (setupStatus == -1)
 		{
@@ -164,15 +140,16 @@ int main(int argc,char* argv[])
 			myProto.MyLed.LedBlink(4);
 			continue;
 		}
-
+		std::cout << "PRUEBA\n"; //The led blinks four times to show the error.
 		//Set broadcast Freq Defaults.
 		unsigned short broadcastAck = api->setBroadcastFreqDefaults(1);
 	  	usleep(500000);
 
+		std::cout << "PRUEBA\n"; //The led blinks four times to show the error.
 		//Managing local time for file name.
 		char time[18];
 		myModem.getTime(time);
-	
+		std::cout << "PRUEBA\n"; //The led blinks four times to show the error.
 		//Managing the opening of the file.
 		int fd;
 		char buf[100];
@@ -222,20 +199,15 @@ int main(int argc,char* argv[])
 		//Measuring euler angle.
 		angle=flight->getEulerAngle();
 		
-		if(mode==1)
-		{
-			//Executing flight mode number one
-			std::cout << "Executing flight mode number one." << std::endl;
-			flight_mode1(api,flight,fd,myModem,myProto,position,angle);
-		}
-		else if(mode==2)
-		{
-			//Executing flight mode number two
-			std::cout << "Executing flight mode number two." << std::endl;
-			flight_mode2(api,flight,fd,myModem,myProto,position,angle);
-		}
-		else
-			continue;
+
+		//Executing flight mode number one
+		//std::cout << "Executing flight mode number one." << std::endl;
+		//flight_mode1(api,flight,fd,myModem,myProto,position,angle);
+	
+		//Executing flight mode number two
+		std::cout << "Executing flight mode number two." << std::endl;
+		flight_mode2(api,flight,fd,myModem,myProto,position,angle);
+
 		//Landing at the take-off point
 		goHome(flight);
 		//landing(api,flight);
