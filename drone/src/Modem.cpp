@@ -98,7 +98,7 @@ void Modem::finish()
 	SIM.close_serial();
 }
 
-void Modem::getInfo1(struct antenna *antennas, int len)
+void Modem::getInfo(struct antenna *antennas, int len)
 {	
 	// With AT+CENG it is possible to get RSSI from 7 antenna at the same antenna. The first one (CENG 0) is always the one that it is connected with and the most powerful.s
 	struct antenna_c antennas_c[len];

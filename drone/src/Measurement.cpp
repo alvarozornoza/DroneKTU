@@ -73,7 +73,6 @@ void measure2(CoreAPI* api, Flight* flight, int fd, PositionData p, Modem myMode
 {	
 	
 	char cadcs[100];
-	char santennas[7][100];
 	double latitude=0,longitude=0;
 	int rxl[numberofvalues];
 	double rxl_avg=0;
@@ -94,7 +93,7 @@ void getData(double *height,int rxl[numberofvalues][len], long cellid[], Flight*
 	struct antenna antennas[len];
 	for(int i=0;i<numberofvalues;i++)
 	{	
-		myModem.getInfo1(antennas,len);	
+		myModem.getInfo(antennas,len);	
 		for(int j=0;j<len;j++)
 		{
 			rxl[i][j]=antennas[j].rxl;
@@ -105,11 +104,18 @@ void getData(double *height,int rxl[numberofvalues][len], long cellid[], Flight*
 		usleep(200000);
 	}	
 }
+
 void getData(double *latitude,double *longitude,int rxl[numberofvalues], Flight* flight, PositionData p, Modem myModem)
 {
-
+	*latitude=flight->getPosition().latitude;
+	*longitude=flight->getPosition().longitude;
+	for(int i=0;i<numberofvalues;i++)
+	{
+		rxl[i]=myModem.getSignalQuality();
+		cout<<i<<"/"<<numberofvalues<<endl;
+		usleep(500000);
+	}
 }
-
 
 void average(int rxl[numberofvalues][len], double rxl_avg[])
 {
@@ -127,12 +133,17 @@ void average(int rxl[numberofvalues][len], double rxl_avg[])
 	for(int j=0;j<len;j++)
 	{
 		rxl_avg[j]=rxl_sum[j]/numberofvalues;
-		
 	}
 }
 
 void average(int rxl[numberofvalues], double *rxl_avg)
 {
+	double rxl_sum=0;
+	for(int j=0;j<numberofvalues;j++)
+	{
+		rxl_sum+=rxl[j];
+	}
+	*rxl_avg=rxl_sum/numberofvalues;
 }
 
 
@@ -154,4 +165,11 @@ void standardDeviation(int rxl[numberofvalues][len], double rxl_avg[], double rx
 
 void standardDeviation(int rxl[numberofvalues], double rxl_avg, double *rxl_sd)
 {
+
+	double rxl_aux=0;
+	for(int j=0;j<numberofvalues;j++)
+	{
+		rxl_aux+=pow(rxl[j]-rxl_avg,2);
+	}
+	*rxl_sd=sqrt(rxl_aux/numberofvalues);
 }

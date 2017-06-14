@@ -119,8 +119,31 @@ int main(int argc,char* argv[])
 		std::cout << "|-Please press the button to run the process or Ctrl+C to close the program-|" << std::endl;
 		std::cout << "|---------------------------------------------------------------------------|" << std::endl;
 		
-		while(!(myProto.MyButton.ButtonStatus()))
+		int previous_state=0, state=0, aux=0, mode;
+		while(1)
 		{
+			state=myProto.MyButton.ButtonStatus();
+			if(state==0 && previous_state==1)
+			{
+				if(aux>=4 && aux<10)
+				{
+					mode=1;
+					std::cout << "\nMode 1 chosen\n";
+					break;
+				}
+				else if(aux>10)
+				{
+					mode=2;
+					std::cout << "\nMode 2 chosen\n";
+					break;
+				}
+				else
+					continue;
+			}			
+			else if(state==1 && previous_state==1)
+				aux++;
+			else
+				continue;
 			usleep(500000);
 		}
 
@@ -198,13 +221,21 @@ int main(int argc,char* argv[])
 
 		//Measuring euler angle.
 		angle=flight->getEulerAngle();
-
-		//Executing flight mode number one
-		flight_mode1(api,flight,fd,myModem,myProto,position,angle);
-
-		//Executing flight mode number two
-		flight_mode2(api,flight,fd,myModem,myProto,position,angle);
-
+		
+		if(mode==1)
+		{
+			//Executing flight mode number one
+			std::cout << "Executing flight mode number one." << std::endl;
+			flight_mode1(api,flight,fd,myModem,myProto,position,angle);
+		}
+		else if(mode==2)
+		{
+			//Executing flight mode number two
+			std::cout << "Executing flight mode number two." << std::endl;
+			flight_mode2(api,flight,fd,myModem,myProto,position,angle);
+		}
+		else
+			continue;
 		//Landing at the take-off point
 		goHome(flight);
 		//landing(api,flight);
@@ -260,7 +291,7 @@ void flight_mode2(CoreAPI* api, Flight* flight, int fd, Modem myModem, Protoboar
 	for(i=1;i<=7;i++)
 	{
 		for(j=1;j<=5;j++)
-		{	
+		{		
 			cout<<"Position "<<j<<"/"<<i<<" (5/7)"<<endl;
 			cout<<"Waiting 10 seconds before measuring"<<endl;
 			countdown(10,false,myProto);
